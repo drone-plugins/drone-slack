@@ -34,7 +34,9 @@ func main() {
 
 	attach := msg.NewAttachment()
 	attach.Text = GetMessage(&links, &repo, &commit)
+	attach.Fallback = GetFallback(&links, &repo, &commit)
 	attach.Color = GetColor(&commit)
+	attach.MrkdwnIn = []string{"text", "fallback"}
 
 	// sends the message
 	err := client.SendMessage(&msg)
@@ -47,6 +49,17 @@ func GetMessage(links *plugin.Links, repo *plugin.Repo, commit *plugin.Commit) s
 	return fmt.Sprintf("*%s* <%s|%s/%s#%s> (%s) by %s",
 		commit.Status,
 		links.Commit,
+		repo.Owner,
+		repo.Name,
+		commit.Sha[:8],
+		commit.Branch,
+		commit.Author,
+	)
+}
+
+func GetFallback(links *plugin.Links, repo *plugin.Repo, commit *plugin.Commit) string {
+	return fmt.Sprintf("%s %s/%s#%s (%s) by %s",
+		commit.Status,
 		repo.Owner,
 		repo.Name,
 		commit.Sha[:8],

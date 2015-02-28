@@ -28,6 +28,7 @@ type Attachment struct {
 	Pretext  string   `json:"pretext"`
 	Color    string   `json:"color"`
 	Fields   []*Field `json:"fields"`
+	MrkdwnIn []string `json:"mrkdwn_in"`
 }
 
 type Field struct {
