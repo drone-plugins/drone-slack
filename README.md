@@ -25,8 +25,8 @@ This plugin is responsible for sending build notifications to your Slack channel
         "message": "Update the Readme"
     },
     "links" : {
-        "repo_url": "https://drone.io/github.com/drone/drone",
-        "commit_url": "https://drone.io/github.com/drone/drone/master/436b7a6e2abaddfd35740527353e78a227ddcb2c"
+        "repo_url": "https://foo.com/github.com/foo/bar",
+        "commit_url": "https://foo.com/github.com/foo/bar/master/436b7a6e"
     },
     "vargs": {
         "webhook_url": "https://hooks.slack.com/services/...",
@@ -66,8 +66,8 @@ docker run -i drone-plugins/drone-slack <<EOF
         "message": "Update the Readme"
     },
     "links" : {
-        "repo_url": "https://drone.io/github.com/drone/drone",
-        "commit_url": "https://drone.io/github.com/drone/drone/master/436b7a6e2abaddfd35740527353e78a227ddcb2c"
+        "repo_url": "https://foo.com/github.com/foo/bar",
+        "commit_url": "https://foo.com/github.com/foo/bar/master/436b7a6e"
     },
     "vargs": {
         "webhook_url": "https://hooks.slack.com/services/...",
