@@ -42,13 +42,13 @@ EOF
 Build the Docker container:
 
 ```sh
-docker build -t drone-plugins/drone-slack .
+docker build --rm=true -t plugins/drone-slack .
 ```
 
 Send a Slack notification:
 
 ```sh
-docker run -i drone-plugins/drone-slack <<EOF
+docker run -i plugins/drone-slack <<EOF
 {
     "repo" : {
         "host": "github.com",
