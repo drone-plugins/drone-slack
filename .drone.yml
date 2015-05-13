@@ -4,5 +4,6 @@ plugin:
   desc: Sends build status notifications to your Slack channel.
   icon: https://brandfolder.com/slack/attachments/ido4tnz4/slack-slack-sticker-logo.png
   type: Notify
+  image: plugins/drone-slack
 
   
