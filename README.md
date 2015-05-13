@@ -12,10 +12,11 @@ This plugin is responsible for sending build notifications to your Slack channel
     "repo" : {
         "host": "github.com",
         "owner": "foo",
-        "name": "bar"
+        "name": "bar",
+        "self": "http://my.drone.io/foo/bar"
     },
     "commit" : {
-        "status": "Success",
+        "state": "success",
         "started_at": 1421029603,
         "finished_at": 1421029813,
         "sha": "9f2849d5",
@@ -23,10 +24,6 @@ This plugin is responsible for sending build notifications to your Slack channel
         "pull_request": "800",
         "author": "john.smith@gmail.com",
         "message": "Update the Readme"
-    },
-    "links" : {
-        "repo_url": "https://foo.com/github.com/foo/bar",
-        "commit_url": "https://foo.com/github.com/foo/bar/master/436b7a6e"
     },
     "vargs": {
         "webhook_url": "https://hooks.slack.com/services/...",
@@ -53,10 +50,11 @@ docker run -i plugins/drone-slack <<EOF
     "repo" : {
         "host": "github.com",
         "owner": "foo",
-        "name": "bar"
+        "name": "bar",
+        "self": "http://my.drone.io/foo/bar"
     },
     "commit" : {
-        "status": "Success",
+        "state": "success",
         "started_at": 1421029603,
         "finished_at": 1421029813,
         "sha": "9f2849d5",
@@ -64,10 +62,6 @@ docker run -i plugins/drone-slack <<EOF
         "pull_request": "800",
         "author": "john.smith@gmail.com",
         "message": "Update the Readme"
-    },
-    "links" : {
-        "repo_url": "https://foo.com/github.com/foo/bar",
-        "commit_url": "https://foo.com/github.com/foo/bar/master/436b7a6e"
     },
     "vargs": {
         "webhook_url": "https://hooks.slack.com/services/...",
