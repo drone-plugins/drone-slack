@@ -13,7 +13,7 @@ This plugin is responsible for sending build notifications to your Slack channel
         "host": "github.com",
         "owner": "foo",
         "name": "bar",
-        "self": "http://my.drone.io/foo/bar"
+        "self_url": "http://my.drone.io/foo/bar"
     },
     "commit" : {
         "state": "success",
