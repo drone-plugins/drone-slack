@@ -13,4 +13,3 @@ RUN go get github.com/drone-plugins/drone-slack/... && \
 
 # run the slack plugin when the container starts
 ENTRYPOINT ["/go/bin/drone-slack"]
-ENTRYPOINT ["/go/bin/drone-slack"]
