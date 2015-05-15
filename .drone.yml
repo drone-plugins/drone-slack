@@ -1,5 +1,7 @@
 build:
   image: golang:1.4.2
+  environment:
+    - GOPATH=/drone
   commands:
     - go get
     - go build
