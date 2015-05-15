@@ -1,5 +1,5 @@
 build:
-  image: go
+  image: golang:1.4.2
   commands:
     - go get
     - go build
