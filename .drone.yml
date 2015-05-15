@@ -1,3 +1,9 @@
+build:
+  image: go
+  commands:
+    - go get
+    - go build
+    - go test
 
 plugin:
   name: Slack
