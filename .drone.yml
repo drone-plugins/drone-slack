@@ -7,6 +7,12 @@ build:
     - go build
     - go test
 
+notify:
+  slack:
+    webhook_url: $$SLACK_URL
+    channel: #dev
+    username: drone
+
 plugin:
   name: Slack
   desc: Sends build status notifications to your Slack channel.
