@@ -36,7 +36,8 @@ EOF
 
 ## Docker
 
-Build the Docker container:
+Build the Docker container. Note that we need to use the `-netgo` tag so that
+the binary is built without a CGO dependency:
 
 ```sh
 go build -a -tags netgo
