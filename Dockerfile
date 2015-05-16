@@ -1,15 +1,9 @@
 # Docker image for Drone's slack notification plugin
 #
+#     go build -a -tags netgo
 #     docker build --rm=true -t plugins/drone-slack .
 
-FROM library/golang:1.4
-
-# copy the local package files to the container's workspace.
-ADD . /go/src/github.com/drone-plugins/drone-slack/
-
-# build the slack plugin inside the container.
-RUN go get github.com/drone-plugins/drone-slack/... && \
-    go install github.com/drone-plugins/drone-slack
-
-# run the slack plugin when the container starts
-ENTRYPOINT ["/go/bin/drone-slack"]
+FROM gliderlabs/alpine:3.1
+RUN apk-install ca-certificates
+ADD drone-slack /bin/
+ENTRYPOINT ["/bin/drone-slack"]

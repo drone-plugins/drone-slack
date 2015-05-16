@@ -1,8 +1,8 @@
 build:
-  image: go
+  image: go:1.4.2
   commands:
     - go get
-    - go build
+    - go build -a -tags netgo
     - go test
 
 plugin:
@@ -13,5 +13,3 @@ plugin:
   labels:
     - chat
     - messaging
-
-  

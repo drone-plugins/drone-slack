@@ -39,6 +39,7 @@ EOF
 Build the Docker container:
 
 ```sh
+go build -a -tags netgo
 docker build --rm=true -t plugins/drone-slack .
 ```
 
