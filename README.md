@@ -10,7 +10,6 @@ This plugin is responsible for sending build notifications to your Slack channel
 ./drone-slack <<EOF
 {
     "repo" : {
-        "host": "github.com",
         "owner": "foo",
         "name": "bar",
         "self_url": "http://my.drone.io/foo/bar"
@@ -50,7 +49,6 @@ Send a Slack notification:
 docker run -i plugins/drone-slack <<EOF
 {
     "repo" : {
-        "host": "github.com",
         "owner": "foo",
         "name": "bar",
         "self": "http://my.drone.io/foo/bar"
