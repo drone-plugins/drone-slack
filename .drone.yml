@@ -1,11 +1,11 @@
 build:
-  image: golang:1.4.2
+  image: drone/golang
   environment:
     - CGO_ENABLED=0
     - GOPATH=/drone
   commands:
     - go get
-    - CGO_ENABLED=0 go build -a -tags netgo
+    - go build
     - go test
 
 publish:
