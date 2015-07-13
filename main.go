@@ -13,10 +13,10 @@ type Slack struct {
 
 func main() {
 	repo := plugin.Repo{}
-	commit := plugin.Commit{}
+	build := plugin.Build{}
 	vargs := Slack{}
 
-	plugin.Param("commit", &commit)
+	plugin.Param("build", &build)
 	plugin.Param("repo", &repo)
 	plugin.Param("vargs", &vargs)
 	plugin.Parse()
@@ -31,9 +31,9 @@ func main() {
 	msg.Username = vargs.Username
 
 	attach := msg.NewAttachment()
-	attach.Text = GetMessage(&repo, &commit)
-	attach.Fallback = GetFallback(&repo, &commit)
-	attach.Color = GetColor(&commit)
+	attach.Text = GetMessage(&repo, &build)
+	attach.Fallback = GetFallback(&repo, &build)
+	attach.Color = GetColor(&build)
 	attach.MrkdwnIn = []string{"text", "fallback"}
 
 	// sends the message
@@ -43,31 +43,31 @@ func main() {
 	}
 }
 
-func GetMessage(repo *plugin.Repo, commit *plugin.Commit) string {
+func GetMessage(repo *plugin.Repo, build *plugin.Build) string {
 	return fmt.Sprintf("*%s* <%s|%s/%s#%s> (%s) by %s",
-		commit.State,
-		fmt.Sprintf("%s/%v", repo.Self, commit.Sequence),
+		build.Status,
+		fmt.Sprintf("%s/%v", repo.Self, build.Number),
 		repo.Owner,
 		repo.Name,
-		commit.Sha[:8],
-		commit.Branch,
-		commit.Author,
+		build.Commit.Sha[:8],
+		build.Commit.Branch,
+		build.Commit.Author.Login,
 	)
 }
 
-func GetFallback(repo *plugin.Repo, commit *plugin.Commit) string {
+func GetFallback(repo *plugin.Repo, build *plugin.Build) string {
 	return fmt.Sprintf("%s %s/%s#%s (%s) by %s",
-		commit.State,
+		build.Status,
 		repo.Owner,
 		repo.Name,
-		commit.Sha[:8],
-		commit.Branch,
-		commit.Author,
+		build.Commit.Sha[:8],
+		build.Commit.Branch,
+		build.Commit.Author.Login,
 	)
 }
 
-func GetColor(commit *plugin.Commit) string {
-	switch commit.State {
+func GetColor(build *plugin.Build) string {
+	switch build.Status {
 	case plugin.StateSuccess:
 		return "good"
 	case plugin.StateFailure, plugin.StateError, plugin.StateKilled:
