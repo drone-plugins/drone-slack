@@ -14,15 +14,20 @@ This plugin is responsible for sending build notifications to your Slack channel
         "name": "bar",
         "self_url": "http://my.drone.io/foo/bar"
     },
-    "commit" : {
-        "state": "success",
+    "build" : {
+        "status": "success",
+        "number": 22,
         "started_at": 1421029603,
         "finished_at": 1421029813,
-        "sha": "9f2849d5",
-        "branch": "master",
-        "pull_request": "800",
-        "author": "john.smith@gmail.com",
-        "message": "Update the Readme"
+        "message": "Update the Readme",
+        "commit": {
+            "sha": "9f2849d5",
+            "branch": "master",
+            "author": {
+                "login": "johnsmith",
+                "author": "john.smith@gmail.com"
+            }
+        }
     },
     "vargs": {
         "webhook_url": "https://hooks.slack.com/services/...",
