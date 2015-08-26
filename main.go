@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/drone/drone-plugin-go/plugin"
 )
 
@@ -19,7 +21,12 @@ func main() {
 	plugin.Param("build", &build)
 	plugin.Param("repo", &repo)
 	plugin.Param("vargs", &vargs)
-	plugin.Parse()
+
+	// parse the parameters
+	if err := plugin.Parse(); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 
 	// create the Slack client
 	client := Client{}
@@ -37,9 +44,9 @@ func main() {
 	attach.MrkdwnIn = []string{"text", "fallback"}
 
 	// sends the message
-	err := client.SendMessage(&msg)
-	if err != nil {
+	if err := client.SendMessage(&msg); err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 }
 
