@@ -14,7 +14,10 @@ The following is a sample Slack configuration in your .drone.yml file:
 ```yaml
 notify:
   slack:
-    webhook_url: https://hooks.slack.com/services/...
-    channel: #dev
-    username: drone
+    webhook_url: 'https://hooks.slack.com/services/...'
+    username: 'drone'
+    channel: '#general'
+    on_started: false
+    on_success: true
+    on_failure: true
 ```
