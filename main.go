@@ -3,14 +3,16 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/drone/drone-plugin-go/plugin"
 )
 
 type Slack struct {
-	Webhook  string `json:"webhook_url"`
-	Channel  string `json:"channel"`
-	Username string `json:"username"`
+	Webhook   string `json:"webhook_url"`
+	Channel   string `json:"channel"`
+	Recipient string `json:"recipient"`
+	Username  string `json:"username"`
 }
 
 func main() {
@@ -36,8 +38,21 @@ func main() {
 
 	// generate the Slack message
 	msg := Message{}
-	msg.Channel = vargs.Channel
 	msg.Username = vargs.Username
+
+	if len(vargs.Recipient) != 0 {
+		if strings.HasPrefix(vargs.Recipient, "@") {
+			msg.Channel = vargs.Recipient
+		} else {
+			msg.Channel = "@" + vargs.Recipient
+		}
+	} else {
+		if strings.HasPrefix(vargs.Channel, "#") {
+			msg.Channel = vargs.Channel
+		} else {
+			msg.Channel = "#" + vargs.Channel
+		}
+	}
 
 	attach := msg.NewAttachment()
 	attach.Text = GetMessage(&repo, &build, &system)
