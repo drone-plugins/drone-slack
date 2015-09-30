@@ -16,10 +16,12 @@ type Slack struct {
 func main() {
 	repo := plugin.Repo{}
 	build := plugin.Build{}
+	system := plugin.System{}
 	vargs := Slack{}
 
 	plugin.Param("build", &build)
 	plugin.Param("repo", &repo)
+	plugin.Param("system", &system)
 	plugin.Param("vargs", &vargs)
 
 	// parse the parameters
@@ -38,7 +40,7 @@ func main() {
 	msg.Username = vargs.Username
 
 	attach := msg.NewAttachment()
-	attach.Text = GetMessage(&repo, &build)
+	attach.Text = GetMessage(&repo, &build, &system)
 	attach.Fallback = GetFallback(&repo, &build)
 	attach.Color = GetColor(&build)
 	attach.MrkdwnIn = []string{"text", "fallback"}
@@ -50,15 +52,15 @@ func main() {
 	}
 }
 
-func GetMessage(repo *plugin.Repo, build *plugin.Build) string {
+func GetMessage(repo *plugin.Repo, build *plugin.Build, sys *plugin.System) string {
 	return fmt.Sprintf("*%s* <%s|%s/%s#%s> (%s) by %s",
 		build.Status,
-		fmt.Sprintf("%s/%v", repo.Self, build.Number),
+		fmt.Sprintf("%s/%s/%v", sys.Link, repo.FullName, build.Number),
 		repo.Owner,
 		repo.Name,
-		build.Commit.Sha[:8],
-		build.Commit.Branch,
-		build.Commit.Author.Login,
+		build.Commit[:8],
+		build.Branch,
+		build.Author,
 	)
 }
 
@@ -67,9 +69,9 @@ func GetFallback(repo *plugin.Repo, build *plugin.Build) string {
 		build.Status,
 		repo.Owner,
 		repo.Name,
-		build.Commit.Sha[:8],
-		build.Commit.Branch,
-		build.Commit.Author.Login,
+		build.Commit[:8],
+		build.Branch,
+		build.Author,
 	)
 }
 
