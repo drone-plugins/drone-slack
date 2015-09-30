@@ -39,19 +39,12 @@ func main() {
 	// generate the Slack message
 	msg := Message{}
 	msg.Username = vargs.Username
+	msg.Channel = vargs.Recipient
 
 	if len(vargs.Recipient) != 0 {
-		if strings.HasPrefix(vargs.Recipient, "@") {
-			msg.Channel = vargs.Recipient
-		} else {
-			msg.Channel = "@" + vargs.Recipient
-		}
+		msg.Channel = Prepend("@", vargs.Recipient)
 	} else {
-		if strings.HasPrefix(vargs.Channel, "#") {
-			msg.Channel = vargs.Channel
-		} else {
-			msg.Channel = "#" + vargs.Channel
-		}
+		msg.Channel = Prepend("#", vargs.Channel)
 	}
 
 	attach := msg.NewAttachment()
@@ -65,6 +58,13 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func Prepend(prefix, s string) string {
+	if !strings.HasPrefix(s, prefix) {
+		return prefix + s
+	}
+	return s
 }
 
 func GetMessage(repo *plugin.Repo, build *plugin.Build, sys *plugin.System) string {
