@@ -17,15 +17,9 @@ publish:
     when:
       branch: master
 
-notify:
-  slack:
-    webhook_url: $$SLACK_URL
-    channel: #dev
-    username: drone
-
 plugin:
   name: Slack
-  desc: Sends build status notifications to your Slack channel.
+  desc: Send build status notifications to your Slack channel.
   type: notify
   image: plugins/drone-slack
   labels:
