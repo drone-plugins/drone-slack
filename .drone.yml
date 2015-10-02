@@ -10,7 +10,7 @@ build:
 
 publish:
   docker:
-    username: $$DOCKER_USER
+    username: drone
     password: $$DOCKER_PASS
     email: $$DOCKER_EMAIL
     repo: plugins/drone-slack
