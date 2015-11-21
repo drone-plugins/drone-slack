@@ -34,6 +34,7 @@ func TestSucess(t *testing.T) {
 		text     string
 	}{
 		{readFile("testdata/basic.json"), "https://hooks.slack.com/services/...", "drone", "#dev", "*success* <http://drone.mycompany.com/foo/bar/22|foo/bar#9f2849d5> (master) by johnsmith"},
+		{readFile("testdata/template.json"), "https://hooks.slack.com/services/...", "drone", "#dev", "*success* foo/bar#9f2849d5 (master) took 3m30s"},
 	}
 	for _, c := range cases {
 		plugin.Stdin = plugin.NewParamSet(c.input)
