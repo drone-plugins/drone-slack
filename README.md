@@ -32,6 +32,7 @@ This plugin is responsible for sending build notifications to your Slack channel
         "webhook_url": "https://hooks.slack.com/services/...",
         "username": "drone",
         "channel": "#dev"
+        "template": "*{{.Build.Status}}* {{.Repo.FullName}}#{{ShortCommit .Build}} ({{.Build.Branch}}) took {{Duration .Build}}"
     }
 }
 EOF
@@ -75,6 +76,7 @@ docker run -i plugins/drone-slack <<EOF
         "webhook_url": "https://hooks.slack.com/services/...",
         "username": "drone",
         "channel": "#dev"
+        "template": "*{{.Build.Status}}* {{.Repo.FullName}}#{{ShortCommit .Build}} ({{.Build.Branch}}) took {{Duration .Build}}"
     }
 }
 EOF

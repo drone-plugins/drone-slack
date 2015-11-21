@@ -8,6 +8,7 @@ The following parameters are used to configuration the notification:
 * **channel** - messages sent to the above webhook are posted here
 * **recipient** - alternatively you can send it to a specific user
 * **username** - choose the username this integration will post as
+* **template** - Go template to create a custom message. See [docs](https://golang.org/pkg/text/template/)
 
 The following is a sample Slack configuration in your .drone.yml file:
 
@@ -17,4 +18,5 @@ notify:
     webhook_url: https://hooks.slack.com/services/...
     channel: dev
     username: drone
+    template: "*{{.Build.Status}}* {{.Repo.FullName}}#{{ShortCommit .Build}} ({{.Build.Branch}}) took {{Duration .Build}}"
 ```
