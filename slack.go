@@ -8,6 +8,11 @@ import (
 	"net/http"
 )
 
+type ClientImpl interface {
+	SendMessage(*Message) error
+	SetUrl(string)
+}
+
 type Client struct {
 	Url string
 }
@@ -67,6 +72,10 @@ func (c *Client) SendMessage(msg *Message) error {
 	}
 
 	return nil
+}
+
+func (c *Client) SetUrl(url string) {
+	c.Url = url
 }
 
 func (m *Message) NewAttachment() *Attachment {

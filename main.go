@@ -15,6 +15,9 @@ type Slack struct {
 	Username  string `json:"username"`
 }
 
+// create the Slack client
+var client ClientImpl = &Client{}
+
 func main() {
 	repo := plugin.Repo{}
 	build := plugin.Build{}
@@ -32,9 +35,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// create the Slack client
-	client := Client{}
-	client.Url = vargs.Webhook
+	client.SetUrl(vargs.Webhook)
 
 	// generate the Slack message
 	msg := Message{}
