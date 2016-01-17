@@ -1,6 +1,9 @@
 # drone-slack
-Drone plugin for sending Slack notifications
 
+[![Build Status](http://beta.drone.io/api/badges/drone-plugins/drone-slack/status.svg)](http://beta.drone.io/drone-plugins/drone-slack)
+[![](https://badge.imagelayers.io/plugins/drone-slack:latest.svg)](https://imagelayers.io/?images=plugins/drone-slack:latest 'Get your own badge on imagelayers.io')
+
+Drone plugin for sending Slack notifications
 
 ## Overview
 
