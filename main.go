@@ -20,7 +20,13 @@ type Slack struct {
 	Template  string `json:"template"`
 }
 
+var (
+	buildDate string
+)
+
 func main() {
+	fmt.Printf("Drone Slack Plugin built at %s\n", buildDate)
+
 	var (
 		repo  = new(drone.Repo)
 		build = new(drone.Build)
