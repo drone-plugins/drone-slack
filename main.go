@@ -21,11 +21,11 @@ type Slack struct {
 }
 
 var (
-	buildDate string
+	buildCommit string
 )
 
 func main() {
-	fmt.Printf("Drone Slack Plugin built at %s\n", buildDate)
+	fmt.Printf("Drone Slack Plugin built from %s\n", buildCommit)
 
 	var (
 		repo  = new(drone.Repo)

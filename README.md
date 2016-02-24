@@ -4,7 +4,7 @@
 [![Coverage Status](https://aircover.co/badges/drone-plugins/drone-slack/coverage.svg)](https://aircover.co/drone-plugins/drone-slack)
 [![](https://badge.imagelayers.io/plugins/drone-slack:latest.svg)](https://imagelayers.io/?images=plugins/drone-slack:latest 'Get your own badge on imagelayers.io')
 
-Drone plugin to send build status notifications via Slack
+Drone plugin to send build status notifications via Slack. For the usage information and a listing of the available options please take a look at [the docs](DOCS.md).
 
 ## Binary
 
