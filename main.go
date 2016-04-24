@@ -2,77 +2,113 @@ package main
 
 import (
 	"fmt"
-	"github.com/drone/drone-plugin-go/plugin"
+	"os"
+
+	"github.com/codegangsta/cli"
+	_ "github.com/joho/godotenv/autoload"
 )
 
-type Slack struct {
-	Webhook  string `json:"webhook_url"`
-	Channel  string `json:"channel"`
-	Username string `json:"username"`
-}
+var build string // build number set at compile-time
 
 func main() {
-	repo := plugin.Repo{}
-	commit := plugin.Commit{}
-	vargs := Slack{}
-
-	plugin.Param("commit", &commit)
-	plugin.Param("repo", &repo)
-	plugin.Param("vargs", &vargs)
-	plugin.Parse()
-
-	// create the Slack client
-	client := Client{}
-	client.Url = vargs.Webhook
-
-	// generate the Slack message
-	msg := Message{}
-	msg.Channel = vargs.Channel
-	msg.Username = vargs.Username
-
-	attach := msg.NewAttachment()
-	attach.Text = GetMessage(&repo, &commit)
-	attach.Fallback = GetFallback(&repo, &commit)
-	attach.Color = GetColor(&commit)
-	attach.MrkdwnIn = []string{"text", "fallback"}
-
-	// sends the message
-	err := client.SendMessage(&msg)
-	if err != nil {
-		fmt.Println(err)
+	app := cli.NewApp()
+	app.Name = "slack"
+	app.Usage = "slack plugin"
+	app.Action = run
+	app.Version = build
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:   "webhook",
+			Usage:  "slack webhook url",
+			EnvVar: "SLACK_WEBHOOK",
+		},
+		cli.StringFlag{
+			Name:   "channel",
+			Usage:  "slack channel",
+			EnvVar: "PLUGIN_CHANNEL",
+		},
+		cli.StringFlag{
+			Name:   "username",
+			Usage:  "slack username",
+			Value:  "drone",
+			EnvVar: "PLUGIN_USERNAME",
+		},
+		cli.StringFlag{
+			Name:   "repo.owner",
+			Usage:  "repository owner",
+			EnvVar: "DRONE_REPO_OWNER",
+		},
+		cli.StringFlag{
+			Name:   "repo.name",
+			Usage:  "repository name",
+			EnvVar: "DRONE_REPO_NAME",
+		},
+		cli.StringFlag{
+			Name:   "commit.sha",
+			Usage:  "git commit sha",
+			EnvVar: "DRONE_COMMIT_SHA",
+		},
+		cli.StringFlag{
+			Name:   "commit.branch",
+			Value:  "master",
+			Usage:  "git commit branch",
+			EnvVar: "DRONE_COMMIT_BRANCH",
+		},
+		cli.StringFlag{
+			Name:   "commit.author",
+			Usage:  "git author name",
+			EnvVar: "DRONE_COMMIT_AUTHOR",
+		},
+		cli.StringFlag{
+			Name:   "build.event",
+			Value:  "push",
+			Usage:  "build event",
+			EnvVar: "DRONE_BUILD_EVENT",
+		},
+		cli.IntFlag{
+			Name:   "build.number",
+			Usage:  "build number",
+			EnvVar: "DRONE_BUILD_NUMBER",
+		},
+		cli.StringFlag{
+			Name:   "build.status",
+			Usage:  "build status",
+			Value:  "success",
+			EnvVar: "DRONE_BUILD_STATUS",
+		},
+		cli.StringFlag{
+			Name:   "build.link",
+			Usage:  "build link",
+			EnvVar: "DRONE_BUILD_LINK",
+		},
 	}
+	app.Run(os.Args)
 }
 
-func GetMessage(repo *plugin.Repo, commit *plugin.Commit) string {
-	return fmt.Sprintf("*%s* <%s|%s/%s#%s> (%s) by %s",
-		commit.State,
-		fmt.Sprintf("%s/%v", repo.Self, commit.Sequence),
-		repo.Owner,
-		repo.Name,
-		commit.Sha[:8],
-		commit.Branch,
-		commit.Author,
-	)
-}
+func run(c *cli.Context) {
+	plugin := Plugin{
+		Repo: Repo{
+			Owner: c.String("repo.owner"),
+			Name:  c.String("repo.name"),
+		},
+		Build: Build{
+			Number: c.Int("build.number"),
+			Event:  c.String("build.event"),
+			Status: c.String("build.status"),
+			Commit: c.String("commit.sha"),
+			Branch: c.String("commit.branch"),
+			Author: c.String("commit.author"),
+			Link:   c.String("build.link"),
+		},
+		Config: Config{
+			Webhook:  c.String("webhook"),
+			Channel:  c.String("channel"),
+			Username: c.String("username"),
+		},
+	}
 
-func GetFallback(repo *plugin.Repo, commit *plugin.Commit) string {
-	return fmt.Sprintf("%s %s/%s#%s (%s) by %s",
-		commit.State,
-		repo.Owner,
-		repo.Name,
-		commit.Sha[:8],
-		commit.Branch,
-		commit.Author,
-	)
-}
-
-func GetColor(commit *plugin.Commit) string {
-	switch commit.State {
-	case plugin.StateSuccess:
-		return "good"
-	case plugin.StateFailure, plugin.StateError, plugin.StateKilled:
-		return "danger"
-	default:
-		return "warning"
+	if err := plugin.Exec(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }

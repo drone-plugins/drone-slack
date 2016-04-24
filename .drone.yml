@@ -1,11 +1,29 @@
+build:
+  test:
+    image: golang:1.5
+    environment:
+      - CGO_ENABLED=0
+      - GO15VENDOREXPERIMENT=1
+    commands:
+      - go vet
+      - go test
+      - go build -ldflags "-s -w -X main.build=$DRONE_BUILD_NUMBER"
+    when:
+      event: push
+
+publish:
+  docker:
+    username: $$DOCKER_USER
+    password: $$DOCKER_PASS
+    email: $$DOCKER_EMAIL
+    repo: plugins/slack
+    tag: latest
 
 plugin:
   name: Slack
-  desc: Sends build status notifications to your Slack channel.
+  desc: Send build status notifications via Slack
   type: notify
   image: plugins/drone-slack
   labels:
     - chat
     - messaging
-
-  

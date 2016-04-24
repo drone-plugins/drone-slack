@@ -1,73 +1,49 @@
 # drone-slack
+
 Drone plugin for sending Slack notifications
 
+## Build
 
-## Overview
+Build the binary with the following commands:
 
-This plugin is responsible for sending build notifications to your Slack channel:
-
-```sh
-./drone-slack <<EOF
-{
-    "repo" : {
-        "host": "github.com",
-        "owner": "foo",
-        "name": "bar",
-        "self_url": "http://my.drone.io/foo/bar"
-    },
-    "commit" : {
-        "state": "success",
-        "started_at": 1421029603,
-        "finished_at": 1421029813,
-        "sha": "9f2849d5",
-        "branch": "master",
-        "pull_request": "800",
-        "author": "john.smith@gmail.com",
-        "message": "Update the Readme"
-    },
-    "vargs": {
-        "webhook_url": "https://hooks.slack.com/services/...",
-        "username": "drone", 
-        "channel": "#dev"
-    }
-}
-EOF
+```
+export GO15VENDOREXPERIMENT=1
+go build
+go test
 ```
 
 ## Docker
 
-Build the Docker container:
+Build the docker image with the following commands:
 
-```sh
-docker build --rm=true -t plugins/drone-slack .
+```
+export GO15VENDOREXPERIMENT=1
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -tags netgo
 ```
 
-Send a Slack notification:
+Please note incorrectly building the image for the correct x64 linux and with GCO disabled will result in an error when running the Docker image:
 
-```sh
-docker run -i plugins/drone-slack <<EOF
-{
-    "repo" : {
-        "host": "github.com",
-        "owner": "foo",
-        "name": "bar",
-        "self": "http://my.drone.io/foo/bar"
-    },
-    "commit" : {
-        "state": "success",
-        "started_at": 1421029603,
-        "finished_at": 1421029813,
-        "sha": "9f2849d5",
-        "branch": "master",
-        "pull_request": "800",
-        "author": "john.smith@gmail.com",
-        "message": "Update the Readme"
-    },
-    "vargs": {
-        "webhook_url": "https://hooks.slack.com/services/...",
-        "username": "drone", 
-        "channel": "#dev"
-    }
-}
-EOF
+```
+docker: Error response from daemon: Container command
+'/bin/drone-slack' not found or does not exist..
+```
+
+## Usage
+
+Post the build status to a channel:
+
+```
+docker run --rm \
+    -e SLACK_WEBHOOK=https://hooks.slack.com/services/... \
+    -e PLUGIN_CHANNEL=foo \
+    -e PLUGIN_USERNAME=drone \
+    -e DRONE_REPO_OWNER=octocat \
+    -e DRONE_REPO_NAME=hello-world \
+    -e DRONE_COMMIT_SHA=7fd1a60b01f91b314f59955a4e4d4e80d8edf11d \
+    -e DRONE_COMMIT_BRANCH=master \
+    -e DRONE_COMMIT_AUTHOR=octocat \
+    -e DRONE_BUILD_NUMBER=1 \
+    -e DRONE_BUILD_STATUS=success \
+    -e DRONE_BUILD_LINK=http://github.com/octocat/hello-world \
+    plugins/slack
 ```
