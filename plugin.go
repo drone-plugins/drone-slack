@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/bluele/slack"
 )
@@ -23,9 +24,10 @@ type (
 	}
 
 	Config struct {
-		Webhook  string
-		Channel  string
-		Username string
+		Webhook   string
+		Channel   string
+		Recipient string
+		Username  string
 	}
 
 	Plugin struct {
@@ -37,7 +39,6 @@ type (
 
 func (p Plugin) Exec() error {
 	payload := slack.WebHookPostPayload{}
-	payload.Channel = p.Config.Channel
 	payload.Username = p.Config.Username
 	payload.Attachments = []*slack.Attachment{
 		{
@@ -46,6 +47,12 @@ func (p Plugin) Exec() error {
 			Color:      color(p.Build),
 			MarkdownIn: []string{"text", "fallback"},
 		},
+	}
+
+	if p.Config.Recipient == "" {
+		payload.Channel = prepend("@", p.Config.Channel)
+	} else {
+		payload.Channel = prepend("#", p.Config.Recipient)
 	}
 
 	client := slack.NewWebHook(p.Config.Webhook)
@@ -84,4 +91,11 @@ func color(build Build) string {
 	default:
 		return "warning"
 	}
+}
+
+func prepend(prefix, s string) string {
+	if !strings.HasPrefix(s, prefix) {
+		return prefix + s
+	}
+	return s
 }
