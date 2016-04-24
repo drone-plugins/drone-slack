@@ -43,6 +43,11 @@ func main() {
 			EnvVar: "PLUGIN_USERNAME",
 		},
 		cli.StringFlag{
+			Name:   "template",
+			Usage:  "slack template",
+			EnvVar: "PLUGIN_TEMPLATE",
+		},
+		cli.StringFlag{
 			Name:   "repo.owner",
 			Usage:  "repository owner",
 			EnvVar: "DRONE_REPO_OWNER",
@@ -114,6 +119,7 @@ func run(c *cli.Context) {
 			Channel:   c.String("channel"),
 			Recipient: c.String("recipient"),
 			Username:  c.String("username"),
+			Template:  c.String("template"),
 		},
 	}
 

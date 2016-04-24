@@ -28,6 +28,7 @@ type (
 		Channel   string
 		Recipient string
 		Username  string
+		Template  string
 	}
 
 	Plugin struct {
@@ -38,21 +39,29 @@ type (
 )
 
 func (p Plugin) Exec() error {
+	attachment := slack.Attachment{
+		Text:       message(p.Repo, p.Build),
+		Fallback:   fallback(p.Repo, p.Build),
+		Color:      color(p.Build),
+		MarkdownIn: []string{"text", "fallback"},
+	}
+
 	payload := slack.WebHookPostPayload{}
 	payload.Username = p.Config.Username
-	payload.Attachments = []*slack.Attachment{
-		{
-			Text:       message(p.Repo, p.Build),
-			Fallback:   fallback(p.Repo, p.Build),
-			Color:      color(p.Build),
-			MarkdownIn: []string{"text", "fallback"},
-		},
-	}
+	payload.Attachments = []*slack.Attachment{&attachment}
 
 	if p.Config.Recipient == "" {
 		payload.Channel = prepend("#", p.Config.Channel)
 	} else {
 		payload.Channel = prepend("@", p.Config.Recipient)
+	}
+
+	if p.Config.Template != "" {
+		txt, err := RenderTrim(p.Config.Template, p)
+		if err != nil {
+			return err
+		}
+		attachment.Text = txt
 	}
 
 	client := slack.NewWebHook(p.Config.Webhook)
