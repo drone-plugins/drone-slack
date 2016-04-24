@@ -8,7 +8,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-var build string // build number set at compile-time
+var version string // build number set at compile-time
 
 var (
 	buildCommit string
@@ -19,7 +19,7 @@ func main() {
 	app.Name = "slack"
 	app.Usage = "slack plugin"
 	app.Action = run
-	app.Version = build
+	app.Version = version
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "webhook",
