@@ -50,9 +50,9 @@ func (p Plugin) Exec() error {
 	}
 
 	if p.Config.Recipient == "" {
-		payload.Channel = prepend("@", p.Config.Channel)
+		payload.Channel = prepend("#", p.Config.Channel)
 	} else {
-		payload.Channel = prepend("#", p.Config.Recipient)
+		payload.Channel = prepend("@", p.Config.Recipient)
 	}
 
 	client := slack.NewWebHook(p.Config.Webhook)
