@@ -28,6 +28,11 @@ func main() {
 			EnvVar: "PLUGIN_CHANNEL",
 		},
 		cli.StringFlag{
+			Name:   "recipient",
+			Usage:  "slack recipient",
+			EnvVar: "PLUGIN_RECIPIENT",
+		},
+		cli.StringFlag{
 			Name:   "username",
 			Usage:  "slack username",
 			Value:  "drone",
@@ -101,9 +106,10 @@ func run(c *cli.Context) {
 			Link:   c.String("build.link"),
 		},
 		Config: Config{
-			Webhook:  c.String("webhook"),
-			Channel:  c.String("channel"),
-			Username: c.String("username"),
+			Webhook:   c.String("webhook"),
+			Channel:   c.String("channel"),
+			Recipient: c.String("recipient"),
+			Username:  c.String("username"),
 		},
 	}
 
