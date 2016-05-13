@@ -34,7 +34,7 @@ Post the build status to a channel:
 
 ```
 docker run --rm \
-    -e SLACK_WEBHOOK=https://hooks.slack.com/services/... \
+    -e PLUGIN_WEBHOOK=https://hooks.slack.com/services/... \
     -e PLUGIN_CHANNEL=foo \
     -e PLUGIN_USERNAME=drone \
     -e DRONE_REPO_OWNER=octocat \

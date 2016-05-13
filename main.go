@@ -20,7 +20,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "webhook",
 			Usage:  "slack webhook url",
-			EnvVar: "SLACK_WEBHOOK",
+			EnvVar: "PLUGIN_WEBHOOK",
 		},
 		cli.StringFlag{
 			Name:   "channel",
