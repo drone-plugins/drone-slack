@@ -1,23 +1,23 @@
-build:
+workspace:
+  base: /go
+
+pipeline:
   test:
-    image: golang:1.5
+    image: golang:1.6
     environment:
       - CGO_ENABLED=0
-      - GO15VENDOREXPERIMENT=1
     commands:
       - go vet
-      - go test
-      - go build -ldflags "-s -w -X main.version=$DRONE_BUILD_NUMBER"
-    when:
-      event: push
+      - go test -cover -coverprofile=coverage.out
+      - go build -ldflags "-s -w -X main.build=$DRONE_BUILD_NUMBER" -a -tags netgo
 
-publish:
-  docker:
-    username: $$DOCKER_USER
-    password: $$DOCKER_PASS
-    email: $$DOCKER_EMAIL
+  latest:
+    image: docker
     repo: plugins/slack
-    tag: latest
+    tags: [ "latest", "1.0", "1" ]
+    when:
+      branch: master
+      event: push
 
 plugin:
   name: Slack
