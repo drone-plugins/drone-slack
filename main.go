@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	_ "github.com/joho/godotenv/autoload"
 )
 
