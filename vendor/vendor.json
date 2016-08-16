@@ -1,0 +1,55 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "ReaSA9WNWleq7/ix8Gh15Z1nxZU=",
+			"path": "github.com/aymerick/raymond",
+			"revision": "47851533fc30927196d3c9d41b854980d11b08a2",
+			"revisionTime": "2015-06-15T14:33:41Z"
+		},
+		{
+			"checksumSHA1": "Kyg2vFdttP2xdIhRy3/n+/m8Z+I=",
+			"path": "github.com/aymerick/raymond/ast",
+			"revision": "47851533fc30927196d3c9d41b854980d11b08a2",
+			"revisionTime": "2015-06-15T14:33:41Z"
+		},
+		{
+			"checksumSHA1": "mc1HnLodMpgu5pA+Z7RH1clacIw=",
+			"path": "github.com/aymerick/raymond/lexer",
+			"revision": "47851533fc30927196d3c9d41b854980d11b08a2",
+			"revisionTime": "2015-06-15T14:33:41Z"
+		},
+		{
+			"checksumSHA1": "iVHn+pMk3p+YWYSE1hK6V7UfFSU=",
+			"path": "github.com/aymerick/raymond/parser",
+			"revision": "47851533fc30927196d3c9d41b854980d11b08a2",
+			"revisionTime": "2015-06-15T14:33:41Z"
+		},
+		{
+			"checksumSHA1": "tOS2WIyCfr3eU4SXEMXq2Pv4xaY=",
+			"path": "github.com/bluele/slack",
+			"revision": "ffdcd19858d03d5ebabba5bead2b5dfb18b2c73f",
+			"revisionTime": "2016-07-01T05:23:51Z"
+		},
+		{
+			"checksumSHA1": "ljZrmD7pmMXAkGNfp6IEzj31fY8=",
+			"path": "github.com/joho/godotenv",
+			"revision": "4ed13390c0acd2ff4e371e64d8b97c8954138243",
+			"revisionTime": "2015-09-07T01:02:28Z"
+		},
+		{
+			"checksumSHA1": "UE4lhbPYYWEhqHXQk24OA73m5+8=",
+			"path": "github.com/joho/godotenv/autoload",
+			"revision": "4ed13390c0acd2ff4e371e64d8b97c8954138243",
+			"revisionTime": "2015-09-07T01:02:28Z"
+		},
+		{
+			"checksumSHA1": "W1G9Avuz92Ng1IqblcO/cIe6pHU=",
+			"path": "github.com/urfave/cli",
+			"revision": "d9021faab69f92295ef7061bd39e4a76dcbdef32",
+			"revisionTime": "2016-07-26T01:14:03Z"
+		}
+	],
+	"rootPath": "github.com/drone-plugins/drone-slack"
+}

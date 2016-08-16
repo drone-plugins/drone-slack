@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -24,7 +24,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "webhook",
 			Usage:  "slack webhook url",
-			EnvVar: "SLACK_WEBHOOK",
+			EnvVar: "SLACK_WEBHOOK,PLUGIN_WEBHOOK",
 		},
 		cli.StringFlag{
 			Name:   "channel",
