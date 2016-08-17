@@ -47,7 +47,7 @@ func main() {
 			EnvVar: "PLUGIN_TEMPLATE",
 		},
 		cli.StringFlag{
-			Name:   "image_url",
+			Name:   "image",
 			Usage:  "slack image url",
 			EnvVar: "PLUGIN_IMAGE_URL",
 		},
