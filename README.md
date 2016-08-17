@@ -19,11 +19,11 @@ go test
 
 ## Docker
 
-Build the docker image with the following commands:
+Build the Docker image with the following commands:
 
 ```
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
-docker build --rm=true -t plugins/slack .
+docker build --rm -t plugins/slack .
 ```
 
 Please note incorrectly building the image for the correct x64 linux and with
@@ -40,7 +40,7 @@ Execute from the working directory:
 
 ```
 docker run --rm \
-  -e SLACK_WEBHOOK=https://hooks.slack.com/services/... \
+  -e PLUGIN_WEBHOOK=https://hooks.slack.com/services/... \
   -e PLUGIN_CHANNEL=foo \
   -e PLUGIN_USERNAME=drone \
   -e DRONE_REPO_OWNER=octocat \

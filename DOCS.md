@@ -5,7 +5,7 @@ You will need to supply Drone with an [Incoming Webhook URL](https://my.slack.co
 
 The following parameters are used to configure the plugin:
 
-* **webhook** - json payloads are sent here
+* **webhook** - JSON payloads are sent here
 * **channel** - messages sent to the above webhook are posted here
 * **recipient** - alternatively you can send it to a specific user
 * **username** - choose the username this integration will post as
@@ -13,14 +13,14 @@ The following parameters are used to configure the plugin:
 
 The following secret values can be set to configure the plugin.
 
-* **SLACK_WEBHOOK** - corresponds to **webhook**
+* **PLUGIN_WEBHOOK** - corresponds to **webhook**
 
-It is highly recommended to put the **SLACK_WEBHOOK** into a secret so it is
+It is highly recommended to put the **PLUGIN_WEBHOOK** into a secret so it is
 not exposed to users. This can be done using the drone-cli.
 
 ```bash
 drone secret add --image=slack \
-    octocat/hello-world SLACK_WEBHOOK https://hooks.slack.com/services/...
+    octocat/hello-world PLUGIN_WEBHOOK https://hooks.slack.com/services/...
 ```
 
 Then sign the YAML file after all secrets are added.
