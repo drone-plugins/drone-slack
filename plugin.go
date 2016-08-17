@@ -29,6 +29,7 @@ type (
 		Recipient string
 		Username  string
 		Template  string
+		ImageURL  string
 	}
 
 	Plugin struct {
@@ -44,6 +45,7 @@ func (p Plugin) Exec() error {
 		Fallback:   fallback(p.Repo, p.Build),
 		Color:      color(p.Build),
 		MarkdownIn: []string{"text", "fallback"},
+		ImageURL:   p.Config.ImageURL,
 	}
 
 	payload := slack.WebHookPostPayload{}
