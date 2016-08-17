@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/urfave/cli"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/urfave/cli"
 )
 
 var version string // build number set at compile-time
@@ -46,6 +46,11 @@ func main() {
 			Name:   "template",
 			Usage:  "slack template",
 			EnvVar: "PLUGIN_TEMPLATE",
+		},
+		cli.StringFlag{
+			Name:   "image_url",
+			Usage:  "slack image url",
+			EnvVar: "PLUGIN_IMAGE_URL",
 		},
 		cli.StringFlag{
 			Name:   "repo.owner",
@@ -120,6 +125,7 @@ func run(c *cli.Context) {
 			Recipient: c.String("recipient"),
 			Username:  c.String("username"),
 			Template:  c.String("template"),
+			ImageURL:  c.String("image_url"),
 		},
 	}
 
