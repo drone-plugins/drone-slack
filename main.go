@@ -124,7 +124,7 @@ func run(c *cli.Context) error {
 			Recipient: c.String("recipient"),
 			Username:  c.String("username"),
 			Template:  c.String("template"),
-			ImageURL:  c.String("image_url"),
+			ImageURL:  c.String("image"),
 		},
 	}
 
