@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 
 	"github.com/bluele/slack"
@@ -29,6 +30,15 @@ type (
 		Recipient string
 		Username  string
 		Template  string
+		Success   MessageOptions
+		Failure   MessageOptions
+	}
+
+	MessageOptions struct {
+		Icon             string
+		Username         string
+		Template         string
+		ImageAttachments []string
 	}
 
 	Plugin struct {
@@ -39,6 +49,8 @@ type (
 )
 
 func (p Plugin) Exec() error {
+	var messageOptions MessageOptions
+
 	attachment := slack.Attachment{
 		Text:       message(p.Repo, p.Build),
 		Fallback:   fallback(p.Repo, p.Build),
@@ -58,6 +70,38 @@ func (p Plugin) Exec() error {
 
 	if p.Config.Template != "" {
 		txt, err := RenderTrim(p.Config.Template, p)
+		if err != nil {
+			return err
+		}
+		attachment.Text = txt
+	}
+
+	// Determine if the build was a success
+	if p.Build.Status == "success" {
+		messageOptions = p.Config.Success
+	} else {
+		messageOptions = p.Config.Failure
+	}
+
+	if strings.HasPrefix(messageOptions.Icon, "http") {
+		payload.IconUrl = messageOptions.Icon
+	} else {
+		payload.IconEmoji = messageOptions.Icon
+	}
+
+	// Add image if any are provided
+	imageCount := len(messageOptions.ImageAttachments)
+
+	if imageCount > 0 {
+		attachment.ImageURL = messageOptions.ImageAttachments[rand.Intn(imageCount)]
+	}
+
+	if messageOptions.Username != "" {
+		payload.Username = messageOptions.Username
+	}
+
+	if messageOptions.Template != "" {
+		txt, err := RenderTrim(messageOptions.Template, p)
 		if err != nil {
 			return err
 		}

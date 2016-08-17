@@ -47,6 +47,46 @@ func main() {
 			EnvVar: "PLUGIN_TEMPLATE",
 		},
 		cli.StringFlag{
+			Name:   "success.username",
+			Usage:  "username for successful builds",
+			EnvVar: "PLUGIN_SUCCESS_USERNAME",
+		},
+		cli.StringFlag{
+			Name:   "success.icon",
+			Usage:  "icon for successful builds",
+			EnvVar: "PLUGIN_SUCCESS_ICON",
+		},
+		cli.StringFlag{
+			Name:   "success.template",
+			Usage:  "template for successful builds",
+			EnvVar: "PLUGIN_SUCCESS_TEMPLATE",
+		},
+		cli.StringSliceFlag{
+			Name:   "success.image_attachments",
+			Usage:  "image attachments for successful builds",
+			EnvVar: "PLUGIN_SUCCESS_IMAGE_ATTACHMENTS",
+		},
+		cli.StringFlag{
+			Name:   "failure.username",
+			Usage:  "username for failed builds",
+			EnvVar: "PLUGIN_FAILURE_USERNAME",
+		},
+		cli.StringFlag{
+			Name:   "failure.icon",
+			Usage:  "icon for failed builds",
+			EnvVar: "PLUGIN_FAILURE_ICON",
+		},
+		cli.StringFlag{
+			Name:   "failure.template",
+			Usage:  "template for failed builds",
+			EnvVar: "PLUGIN_FAILURE_TEMPLATE",
+		},
+		cli.StringSliceFlag{
+			Name:   "failure.image_attachments",
+			Usage:  "image attachments for failed builds",
+			EnvVar: "PLUGIN_FAILURE_IMAGE_ATTACHMENTS",
+		},
+		cli.StringFlag{
 			Name:   "repo.owner",
 			Usage:  "repository owner",
 			EnvVar: "DRONE_REPO_OWNER",
@@ -119,6 +159,18 @@ func run(c *cli.Context) error {
 			Recipient: c.String("recipient"),
 			Username:  c.String("username"),
 			Template:  c.String("template"),
+			Success: MessageOptions{
+				Username:         c.String("success.username"),
+				Icon:             c.String("success.icon"),
+				Template:         c.String("success.template"),
+				ImageAttachments: c.StringSlice("success.image_attachments"),
+			},
+			Failure: MessageOptions{
+				Username:         c.String("failure.username"),
+				Icon:             c.String("failure.icon"),
+				Template:         c.String("failure.template"),
+				ImageAttachments: c.StringSlice("failure.image_attachments"),
+			},
 		},
 	}
 
