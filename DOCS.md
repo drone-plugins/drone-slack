@@ -10,7 +10,7 @@ The following parameters are used to configure the plugin:
 * **recipient** - alternatively you can send it to a specific user
 * **username** - choose the username this integration will post as
 * **template** - overwrite the default message template
-* **image** - A valid URL to an image file that will be displayed inside a message attachment
+* **image_url** - A valid URL to an image file that will be displayed inside a message attachment
 * **icon_url** - A valid URL that displays a image to the left of the username
 * **icon_emoji** - displays a emoji to the left of the username
 
