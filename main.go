@@ -52,6 +52,16 @@ func main() {
 			EnvVar: "PLUGIN_IMAGE_URL",
 		},
 		cli.StringFlag{
+			Name:   "icon.url",
+			Usage:  "slack icon url",
+			EnvVar: "PLUGIN_ICON_URL",
+		},
+		cli.StringFlag{
+			Name:   "icon.emoji",
+			Usage:  "slack emoji url",
+			EnvVar: "PLUGIN_ICON_EMOJI",
+		},
+		cli.StringFlag{
 			Name:   "repo.owner",
 			Usage:  "repository owner",
 			EnvVar: "DRONE_REPO_OWNER",
@@ -124,7 +134,9 @@ func run(c *cli.Context) error {
 			Recipient: c.String("recipient"),
 			Username:  c.String("username"),
 			Template:  c.String("template"),
-			ImageURL:  c.String("image_url"),
+			ImageURL:  c.String("image"),
+			IconURL:   c.String("icon.url"),
+			IconEmoji: c.String("icon.emoji"),
 		},
 	}
 

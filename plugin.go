@@ -30,6 +30,8 @@ type (
 		Username  string
 		Template  string
 		ImageURL  string
+		IconURL   string
+		IconEmoji string
 	}
 
 	Plugin struct {
@@ -51,6 +53,8 @@ func (p Plugin) Exec() error {
 	payload := slack.WebHookPostPayload{}
 	payload.Username = p.Config.Username
 	payload.Attachments = []*slack.Attachment{&attachment}
+	payload.IconUrl = p.Config.IconURL
+	payload.IconEmoji = p.Config.IconEmoji
 
 	if p.Config.Recipient == "" {
 		payload.Channel = prepend("#", p.Config.Channel)

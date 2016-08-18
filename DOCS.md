@@ -10,6 +10,9 @@ The following parameters are used to configure the plugin:
 * **recipient** - alternatively you can send it to a specific user
 * **username** - choose the username this integration will post as
 * **template** - overwrite the default message template
+* **image_url** - A valid URL to an image file that will be displayed inside a message attachment
+* **icon_url** - A valid URL that displays a image to the left of the username
+* **icon_emoji** - displays a emoji to the left of the username
 
 The following secret values can be set to configure the plugin.
 
@@ -54,4 +57,43 @@ pipeline:
     username: drone
     template: >
       build #{{ build.number }} finished with a {{ build.status }} status
+```
+
+Example attach image inside a message:
+
+```yaml
+pipeline:
+  slack:
+    webhook: https://hooks.slack.com/services/...
+    channel: dev
+    username: drone
+    template: >
+      build #{{ build.number }} finished with a {{ build.status }} status
+    image: https://cdn3.iconfinder.com/data/icons/picons-social/57/16-apple-128.png
+```
+
+Example change user avatar via icon URL:
+
+```yaml
+pipeline:
+  slack:
+    webhook: https://hooks.slack.com/services/...
+    channel: dev
+    username: drone
+    template: >
+      build #{{ build.number }} finished with a {{ build.status }} status
+    icon_url: https://cdn0.iconfinder.com/data/icons/shift-free/32/Error-128.png
+```
+
+Example change user avatar via icon emoji:
+
+```yaml
+pipeline:
+  slack:
+    webhook: https://hooks.slack.com/services/...
+    channel: dev
+    username: drone
+    template: >
+      build #{{ build.number }} finished with a {{ build.status }} status
+    icon_emoji: :+1:
 ```
