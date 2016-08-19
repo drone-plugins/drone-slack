@@ -22,7 +22,7 @@ It is highly recommended to put the **SLACK_WEBHOOK** into a secret so it is
 not exposed to users. This can be done using the drone-cli.
 
 ```bash
-drone secret add --image=slack \
+drone secret add --image=plugins/slack \
     octocat/hello-world SLACK_WEBHOOK https://hooks.slack.com/services/...
 ```
 
@@ -42,6 +42,7 @@ Common default example configuration:
 ```yaml
 pipeline:
   slack:
+    image: plugins/slack
     webhook: https://hooks.slack.com/services/...
     channel: dev
     username: drone
@@ -52,6 +53,7 @@ Example using a customized message:
 ```yaml
 pipeline:
   slack:
+    image: plugins/slack
     webhook: https://hooks.slack.com/services/...
     channel: dev
     username: drone
@@ -64,6 +66,7 @@ Example attach image inside a message:
 ```yaml
 pipeline:
   slack:
+    image: plugins/slack
     webhook: https://hooks.slack.com/services/...
     channel: dev
     username: drone
@@ -77,6 +80,7 @@ Example change user avatar via icon URL:
 ```yaml
 pipeline:
   slack:
+    image: plugins/slack
     webhook: https://hooks.slack.com/services/...
     channel: dev
     username: drone
@@ -90,6 +94,7 @@ Example change user avatar via icon emoji:
 ```yaml
 pipeline:
   slack:
+    image: plugins/slack
     webhook: https://hooks.slack.com/services/...
     channel: dev
     username: drone
