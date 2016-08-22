@@ -3,19 +3,16 @@ package main
 import (
 	"os"
 
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/Sirupsen/logrus"
+	"github.com/joho/godotenv"
 	"github.com/urfave/cli"
 )
 
 var version string // build number set at compile-time
 
-var (
-	buildCommit string
-)
-
 func main() {
 	app := cli.NewApp()
-	app.Name = "slack"
+	app.Name = "slack plugin"
 	app.Usage = "slack plugin"
 	app.Action = run
 	app.Version = version
@@ -109,11 +106,22 @@ func main() {
 			Usage:  "build link",
 			EnvVar: "DRONE_BUILD_LINK",
 		},
+		cli.StringFlag{
+			Name:  "env-file",
+			Usage: "source env file",
+		},
 	}
-	app.Run(os.Args)
+
+	if err := app.Run(os.Args); err != nil {
+		logrus.Fatal(err)
+	}
 }
 
 func run(c *cli.Context) error {
+	if c.String("env-file") != "" {
+		_ = godotenv.Load(c.String("env-file"))
+	}
+
 	plugin := Plugin{
 		Repo: Repo{
 			Owner: c.String("repo.owner"),
