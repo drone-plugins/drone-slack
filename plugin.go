@@ -56,10 +56,10 @@ func (p Plugin) Exec() error {
 	payload.IconUrl = p.Config.IconURL
 	payload.IconEmoji = p.Config.IconEmoji
 
-	if p.Config.Recipient == "" {
-		payload.Channel = prepend("#", p.Config.Channel)
-	} else {
+	if p.Config.Recipient != "" {
 		payload.Channel = prepend("@", p.Config.Recipient)
+	} else if p.Config.Channel != "" {
+		payload.Channel = prepend("#", p.Config.Channel)
 	}
 
 	if p.Config.Template != "" {
