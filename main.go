@@ -36,7 +36,6 @@ func main() {
 		cli.StringFlag{
 			Name:   "username",
 			Usage:  "slack username",
-			Value:  "drone",
 			EnvVar: "PLUGIN_USERNAME",
 		},
 		cli.StringFlag{
