@@ -67,12 +67,16 @@ var funcs = map[string]interface{}{
 }
 
 func truncate(s string, len int) string {
-	if utf8.RuneCountInString(s) <= len {
+	if utf8.RuneCountInString(s) <= len && len > 0 {
 		return s
 	}
 	runes := []rune(s)
-	return string(runes[:len])
-
+	if len < 0 {
+		len = -len
+		return string(runes[len:])
+	} else {
+		return string(runes[:len])
+	}
 }
 
 func uppercaseFirst(s string) string {
