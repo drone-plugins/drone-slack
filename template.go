@@ -67,7 +67,7 @@ var funcs = map[string]interface{}{
 }
 
 func truncate(s string, len int) string {
-	if utf8.RuneCountInString(s) <= len && len >= 0 {
+	if utf8.RuneCountInString(s) <= int(math.Abs(float64(len))) {
 		return s
 	}
 	runes := []rune(s)
