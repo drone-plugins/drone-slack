@@ -51,5 +51,6 @@ docker run --rm \
   -e DRONE_BUILD_NUMBER=1 \
   -e DRONE_BUILD_STATUS=success \
   -e DRONE_BUILD_LINK=http://github.com/octocat/hello-world \
+  -e DRONE_TAG=1.0.0 \
   plugins/slack
 ```
