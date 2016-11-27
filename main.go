@@ -107,6 +107,11 @@ func main() {
 			EnvVar: "DRONE_BUILD_LINK",
 		},
 		cli.StringFlag{
+			Name:   "build.tag",
+			Usage:  "build tag",
+			EnvVar: "DRONE_TAG",
+		},
+		cli.StringFlag{
 			Name:  "env-file",
 			Usage: "source env file",
 		},
@@ -128,6 +133,7 @@ func run(c *cli.Context) error {
 			Name:  c.String("repo.name"),
 		},
 		Build: Build{
+			Tag:    c.String("build.tag"),
 			Number: c.Int("build.number"),
 			Event:  c.String("build.event"),
 			Status: c.String("build.status"),
