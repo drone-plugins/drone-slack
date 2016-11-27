@@ -23,7 +23,7 @@ Build the docker image with the following commands:
 
 ```
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
-docker build --rm=true -t plugins/slack .
+docker build -t plugins/slack .
 ```
 
 Please note incorrectly building the image for the correct x64 linux and with
