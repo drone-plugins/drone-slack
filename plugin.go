@@ -18,6 +18,7 @@ type (
 		Event  string
 		Number int
 		Commit string
+		Ref    string
 		Branch string
 		Author string
 		Status string
