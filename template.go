@@ -64,6 +64,7 @@ var funcs = map[string]interface{}{
 	"failure":        isFailure,
 	"truncate":       truncate,
 	"urlencode":      urlencode,
+	"since":          since,
 }
 
 func truncate(s string, len int) string {
@@ -125,4 +126,12 @@ func isFailure(conditional bool, options *raymond.Options) string {
 
 func urlencode(options *raymond.Options) string {
 	return url.QueryEscape(options.Fn())
+}
+
+func since(start int64) string {
+	// NOTE: not using `time.Since()` because the fractional second component
+	// will give us something like "40m12.917523438s" vs "40m12s". We lose
+	// some precision, but the format is much more readable.
+	now := time.Unix(time.Now().Unix(), 0)
+	return fmt.Sprintln(now.Sub(time.Unix(start, 0)))
 }

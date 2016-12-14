@@ -14,15 +14,17 @@ type (
 	}
 
 	Build struct {
-		Tag    string
-		Event  string
-		Number int
-		Commit string
-		Ref    string
-		Branch string
-		Author string
-		Status string
-		Link   string
+		Tag     string
+		Event   string
+		Number  int
+		Commit  string
+		Ref     string
+		Branch  string
+		Author  string
+		Status  string
+		Link    string
+		Started int64
+		Created int64
 	}
 
 	Config struct {
@@ -36,10 +38,15 @@ type (
 		IconEmoji string
 	}
 
+	Job struct {
+		Started int64
+	}
+
 	Plugin struct {
 		Repo   Repo
 		Build  Build
 		Config Config
+		Job    Job
 	}
 )
 
