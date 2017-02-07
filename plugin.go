@@ -83,13 +83,23 @@ func (p Plugin) Exec() error {
 	return client.PostMessage(&payload)
 }
 
+func getRef(build Build) string {
+	ref := ""
+	if build.Commit != "" {
+		ref = build.Commit[:8]
+	} else {
+		ref = build.Tag
+	}
+	return ref
+}
+
 func message(repo Repo, build Build) string {
 	return fmt.Sprintf("*%s* <%s|%s/%s#%s> (%s) by %s",
 		build.Status,
 		build.Link,
 		repo.Owner,
 		repo.Name,
-		build.Commit[:8],
+		getRef(build),
 		build.Branch,
 		build.Author,
 	)
@@ -100,7 +110,7 @@ func fallback(repo Repo, build Build) string {
 		build.Status,
 		repo.Owner,
 		repo.Name,
-		build.Commit[:8],
+		getRef(build),
 		build.Branch,
 		build.Author,
 	)
