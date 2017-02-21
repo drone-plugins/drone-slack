@@ -21,6 +21,7 @@ type (
 		Ref     string
 		Branch  string
 		Author  string
+		Pull    string
 		Status  string
 		Link    string
 		Started int64
