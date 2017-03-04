@@ -21,6 +21,7 @@ type (
 		Ref     string
 		Branch  string
 		Author  string
+		Message string
 		Status  string
 		Link    string
 		Started int64
@@ -92,6 +93,7 @@ func message(repo Repo, build Build) string {
 		build.Commit[:8],
 		build.Branch,
 		build.Author,
+		build.Message,
 	)
 }
 
@@ -103,6 +105,7 @@ func fallback(repo Repo, build Build) string {
 		build.Commit[:8],
 		build.Branch,
 		build.Author,
+		build.Message,
 	)
 }
 
