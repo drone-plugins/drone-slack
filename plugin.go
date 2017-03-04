@@ -85,7 +85,7 @@ func (p Plugin) Exec() error {
 }
 
 func message(repo Repo, build Build) string {
-	return fmt.Sprintf("*%s* <%s|%s/%s#%s> (%s) by %s",
+	return fmt.Sprintf("*%s* <%s|%s/%s#%s> (%s) by %s. Changes: %s",
 		build.Status,
 		build.Link,
 		repo.Owner,
@@ -98,7 +98,7 @@ func message(repo Repo, build Build) string {
 }
 
 func fallback(repo Repo, build Build) string {
-	return fmt.Sprintf("%s %s/%s#%s (%s) by %s",
+	return fmt.Sprintf("%s %s/%s#%s (%s) by %s. Changes: %s",
 		build.Status,
 		repo.Owner,
 		repo.Name,
