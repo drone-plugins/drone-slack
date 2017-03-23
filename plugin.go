@@ -14,18 +14,19 @@ type (
 	}
 
 	Build struct {
-		Tag     string
-		Event   string
-		Number  int
-		Commit  string
-		Ref     string
-		Branch  string
-		Author  string
-		Message string
-		Status  string
-		Link    string
-		Started int64
-		Created int64
+		Tag        string
+		Event      string
+		Number     int
+		Commit     string
+		Ref        string
+		Branch     string
+		Author     string
+		Message    string
+		CommitLink string
+		Status     string
+		Link       string
+		Started    int64
+		Created    int64
 	}
 
 	Config struct {
@@ -53,11 +54,11 @@ type (
 
 func (p Plugin) Exec() error {
 	attachment := slack.Attachment{
-		Text:       message(p.Repo, p.Build),
 		Fallback:   fallback(p.Repo, p.Build),
 		Color:      color(p.Build),
 		MarkdownIn: []string{"text", "fallback"},
 		ImageURL:   p.Config.ImageURL,
+		Fields:     fields(p.Repo, p.Build),
 	}
 
 	payload := slack.WebHookPostPayload{}
@@ -84,16 +85,39 @@ func (p Plugin) Exec() error {
 	return client.PostMessage(&payload)
 }
 
-func message(repo Repo, build Build) string {
-	return fmt.Sprintf("*%s* <%s|%s/%s#%s> (%s) by %s",
-		build.Status,
-		build.Link,
-		repo.Owner,
-		repo.Name,
-		build.Commit[:8],
-		build.Branch,
-		build.Author,
-	)
+func fields(repo Repo, build Build) []*slack.AttachmentField {
+	return []*slack.AttachmentField{
+		&slack.AttachmentField{
+			Title: "Status",
+			Value: build.Status,
+			Short: true,
+		},
+		&slack.AttachmentField{
+			Title: "Branch",
+			Value: build.Branch,
+			Short: true,
+		},
+		&slack.AttachmentField{
+			Title: "Output",
+			Value: fmt.Sprintf("<%s|%s/%s#%d>", build.Link, repo.Owner, repo.Name, build.Number),
+			Short: true,
+		},
+		&slack.AttachmentField{
+			Title: "Commit",
+			Value: fmt.Sprintf("<%s|%s>", build.CommitLink, build.Commit[:12]),
+			Short: true,
+		},
+		&slack.AttachmentField{
+			Title: "Author",
+			Value: build.Author,
+			Short: false,
+		},
+		&slack.AttachmentField{
+			Title: "Commit Message",
+			Value: build.Message,
+			Short: false,
+		},
+	}
 }
 
 func fallback(repo Repo, build Build) string {
