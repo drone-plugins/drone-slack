@@ -5,7 +5,7 @@
 [![Go Report](https://goreportcard.com/badge/github.com/drone-plugins/drone-slack)](https://goreportcard.com/report/github.com/drone-plugins/drone-slack)
 [![Join the chat at https://gitter.im/drone/drone](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/drone/drone)
 
-Drone plugin for sending Slack notifications. For the usage information and a listing of the available options please reference [the documentation](http://plugins.drone.io/drone-plugins/slack).
+Drone plugin for sending Slack notifications. For the usage information and a listing of the available options please reference [the documentation](http://plugins.drone.io/drone-plugins/drone-slack/).
 
 ## Build
 
