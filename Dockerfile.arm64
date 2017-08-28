@@ -14,5 +14,5 @@ LABEL org.label-schema.name="Drone Slack"
 LABEL org.label-schema.vendor="Drone.IO Community"
 LABEL org.label-schema.schema-version="1.0"
 
-ADD release/linux/amd64/drone-slack /bin/
+ADD release/linux/arm64/drone-slack /bin/
 ENTRYPOINT [ "/bin/drone-slack" ]
