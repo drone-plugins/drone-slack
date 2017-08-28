@@ -72,7 +72,7 @@ func main() {
 			Name:   "commit.sha",
 			Usage:  "git commit sha",
 			EnvVar: "DRONE_COMMIT_SHA",
-			Value:  "unsetSHA",
+			Value:  "00000000",
 		},
 		cli.StringFlag{
 			Name:   "commit.ref",
