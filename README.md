@@ -1,9 +1,10 @@
 # drone-slack
 
 [![Build Status](http://beta.drone.io/api/badges/drone-plugins/drone-slack/status.svg)](http://beta.drone.io/drone-plugins/drone-slack)
+[![Join the chat at https://gitter.im/drone/drone](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/drone/drone)
 [![Go Doc](https://godoc.org/github.com/drone-plugins/drone-slack?status.svg)](http://godoc.org/github.com/drone-plugins/drone-slack)
 [![Go Report](https://goreportcard.com/badge/github.com/drone-plugins/drone-slack)](https://goreportcard.com/report/github.com/drone-plugins/drone-slack)
-[![Join the chat at https://gitter.im/drone/drone](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/drone/drone)
+[![](https://images.microbadger.com/badges/image/plugins/slack.svg)](https://microbadger.com/images/plugins/slack "Get your own image badge on microbadger.com")
 
 Drone plugin for sending Slack notifications. For the usage information and a listing of the available options please take a look at [the docs](http://plugins.drone.io/drone-plugins/drone-slack/).
 
@@ -13,7 +14,6 @@ Build the binary with the following commands:
 
 ```
 go build
-go test
 ```
 
 ## Docker
@@ -21,16 +21,8 @@ go test
 Build the Docker image with the following commands:
 
 ```
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
-docker build -t plugins/slack .
-```
-
-Please note incorrectly building the image for the correct x64 linux and with
-CGO disabled will result in an error when running the Docker image:
-
-```
-docker: Error response from daemon: Container command
-'/bin/drone-slack' not found or does not exist..
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -tags netgo -o release/linux/amd64/drone-slack
+docker build --rm -t plugins/slack .
 ```
 
 ## Usage

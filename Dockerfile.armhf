@@ -1,5 +1,0 @@
-FROM centurylink/ca-certs
-ENV GODEBUG=netdns=go
-
-ADD release/linux/arm/drone-slack /bin/
-ENTRYPOINT ["/bin/drone-slack"]
