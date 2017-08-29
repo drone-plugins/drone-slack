@@ -17,7 +17,7 @@ pipeline:
       - GOARCH=amd64
       - CGO_ENABLED=0
     commands:
-      - go build -v -ldflags "-X main.build=${DRONE_BUILD_NUMBER}" -a -tags netgo -o release/linux/amd64/drone-slack
+      - go build -v -ldflags "-X main.build=${DRONE_BUILD_NUMBER}" -a -o release/linux/amd64/drone-slack
 
   build_linux_arm64:
     image: golang:1.9
@@ -27,7 +27,7 @@ pipeline:
       - GOARCH=arm64
       - CGO_ENABLED=0
     commands:
-      - go build -v -ldflags "-X main.build=${DRONE_BUILD_NUMBER}" -a -tags netgo -o release/linux/arm64/drone-slack
+      - go build -v -ldflags "-X main.build=${DRONE_BUILD_NUMBER}" -a -o release/linux/arm64/drone-slack
 
   build_linux_arm:
     image: golang:1.9
@@ -38,7 +38,7 @@ pipeline:
       - CGO_ENABLED=0
       - GOARM=7
     commands:
-      - go build -v -ldflags "-X main.build=${DRONE_BUILD_NUMBER}" -a -tags netgo -o release/linux/arm/drone-slack
+      - go build -v -ldflags "-X main.build=${DRONE_BUILD_NUMBER}" -a -o release/linux/arm/drone-slack
 
   # build_windows_amd64:
   #   image: golang:1.9-nanoserver
@@ -48,7 +48,7 @@ pipeline:
   #     - GOARCH=amd64
   #     - CGO_ENABLED=0
   #   commands:
-  #     - go build -v -ldflags "-X main.build=${DRONE_BUILD_NUMBER}" -a -tags netgo -o release/windows/amd64/drone-slack
+  #     - go build -v -ldflags "-X main.build=${DRONE_BUILD_NUMBER}" -a -o release/windows/amd64/drone-slack
 
   publish_linux_amd64:
     image: plugins/docker
