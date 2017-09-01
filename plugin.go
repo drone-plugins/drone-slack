@@ -14,18 +14,19 @@ type (
 	}
 
 	Build struct {
-		Tag     string
-		Event   string
-		Number  int
-		Commit  string
-		Ref     string
-		Branch  string
-		Author  string
-		Message string
-		Status  string
-		Link    string
-		Started int64
-		Created int64
+		Tag      string
+		Event    string
+		Number   int
+		Commit   string
+		Ref      string
+		Branch   string
+		Author   string
+		Message  string
+		DeployTo string
+		Status   string
+		Link     string
+		Started  int64
+		Created  int64
 	}
 
 	Config struct {
