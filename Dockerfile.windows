@@ -1,8 +1,6 @@
 FROM microsoft/nanoserver:latest
 MAINTAINER Drone.IO Community <drone-dev@googlegroups.com>
 
-ENV GODEBUG=netdns=go
-
 LABEL org.label-schema.version=latest
 LABEL org.label-schema.vcs-url="https://github.com/drone-plugins/drone-slack.git"
 LABEL org.label-schema.name="Drone Slack"
