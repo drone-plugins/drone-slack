@@ -31,14 +31,15 @@ type (
 	}
 
 	Config struct {
-		Webhook   string
-		Channel   string
-		Recipient string
-		Username  string
-		Template  string
-		ImageURL  string
-		IconURL   string
-		IconEmoji string
+		Webhook                string
+		Channel                string
+		Recipient              string
+		AuthorRecipientMapping map[string]string
+		Username               string
+		Template               string
+		ImageURL               string
+		IconURL                string
+		IconEmoji              string
 	}
 
 	Job struct {
@@ -69,7 +70,13 @@ func (p Plugin) Exec() error {
 	payload.IconEmoji = p.Config.IconEmoji
 
 	if p.Config.Recipient != "" {
-		payload.Channel = prepend("@", p.Config.Recipient)
+		recipient := p.Config.Recipient
+		if len(p.Config.AuthorRecipientMapping) != 0 {
+			if r, found := p.Config.AuthorRecipientMapping[p.Build.Author]; found && r != "" {
+				recipient = r
+			}
+		}
+		payload.Channel = prepend("@", recipient)
 	} else if p.Config.Channel != "" {
 		payload.Channel = prepend("#", p.Config.Channel)
 	}

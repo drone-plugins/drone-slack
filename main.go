@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/joho/godotenv"
@@ -32,6 +33,11 @@ func main() {
 			Name:   "recipient",
 			Usage:  "slack recipient",
 			EnvVar: "PLUGIN_RECIPIENT",
+		},
+		cli.StringSliceFlag{
+			Name:   "author.recipient.mapping",
+			Usage:  "mapping of authors and slack recipients. author1=recipient1,author2=recipient2",
+			EnvVar: "PLUGIN_AUTHOR_RECIPIENT_MAPPING",
 		},
 		cli.StringFlag{
 			Name:   "username",
@@ -189,16 +195,29 @@ func run(c *cli.Context) error {
 			Started: c.Int64("job.started"),
 		},
 		Config: Config{
-			Webhook:   c.String("webhook"),
-			Channel:   c.String("channel"),
-			Recipient: c.String("recipient"),
-			Username:  c.String("username"),
-			Template:  c.String("template"),
-			ImageURL:  c.String("image"),
-			IconURL:   c.String("icon.url"),
-			IconEmoji: c.String("icon.emoji"),
+			Webhook:                c.String("webhook"),
+			Channel:                c.String("channel"),
+			Recipient:              c.String("recipient"),
+			AuthorRecipientMapping: parseKeyValueStringSlice(c.StringSlice("author.recipient.mapping")),
+			Username:               c.String("username"),
+			Template:               c.String("template"),
+			ImageURL:               c.String("image"),
+			IconURL:                c.String("icon.url"),
+			IconEmoji:              c.String("icon.emoji"),
 		},
 	}
 
 	return plugin.Exec()
+}
+
+func parseKeyValueStringSlice(s []string) map[string]string {
+	mapping := map[string]string{}
+	for _, v := range s {
+		parts := strings.Split(v, "=")
+		if len(parts) != 2 {
+			continue
+		}
+		mapping[parts[0]] = parts[1]
+	}
+	return mapping
 }
