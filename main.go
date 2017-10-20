@@ -92,6 +92,11 @@ func main() {
 			EnvVar: "DRONE_COMMIT_AUTHOR",
 		},
 		cli.StringFlag{
+			Name:   "commit.pull",
+			Usage:  "git pull request",
+			EnvVar: "DRONE_PULL_REQUEST",
+		},
+		cli.StringFlag{
 			Name:   "commit.message",
 			Usage:  "commit message",
 			EnvVar: "DRONE_COMMIT_MESSAGE",
@@ -173,6 +178,7 @@ func run(c *cli.Context) error {
 			Ref:      c.String("commit.ref"),
 			Branch:   c.String("commit.branch"),
 			Author:   c.String("commit.author"),
+			Pull:     c.String("commit.pull"),
 			Message:  c.String("commit.message"),
 			DeployTo: c.String("build.deployTo"),
 			Link:     c.String("build.link"),

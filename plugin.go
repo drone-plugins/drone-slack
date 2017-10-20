@@ -21,6 +21,7 @@ type (
 		Ref      string
 		Branch   string
 		Author   string
+		Pull     string
 		Message  string
 		DeployTo string
 		Status   string
