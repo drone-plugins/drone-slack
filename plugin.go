@@ -50,6 +50,7 @@ type (
 		Build  Build
 		Config Config
 		Job    Job
+		DryRun bool
 	}
 )
 
@@ -83,7 +84,13 @@ func (p Plugin) Exec() error {
 	}
 
 	client := slack.NewWebHook(p.Config.Webhook)
-	return client.PostMessage(&payload)
+	if p.DryRun {
+		fmt.Println("dry-run enabled, skipping post to slack")
+
+		return nil
+	} else {
+		return client.PostMessage(&payload)
+	}
 }
 
 func message(repo Repo, build Build) string {
