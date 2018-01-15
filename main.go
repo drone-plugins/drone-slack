@@ -18,6 +18,11 @@ func main() {
 	app.Action = run
 	app.Version = fmt.Sprintf("1.1.0+%s", build)
 	app.Flags = []cli.Flag{
+		cli.BoolFlag{
+			Name:   "dry-run",
+			Usage:  "dry run disables posting message to slack",
+			EnvVar: "SLACK_DRY_RUN,PLUGIN_DRY_RUN",
+		},
 		cli.StringFlag{
 			Name:   "webhook",
 			Usage:  "slack webhook url",
@@ -198,6 +203,7 @@ func run(c *cli.Context) error {
 			IconURL:   c.String("icon.url"),
 			IconEmoji: c.String("icon.emoji"),
 		},
+		DryRun: c.Bool("dry-run"),
 	}
 
 	return plugin.Exec()
