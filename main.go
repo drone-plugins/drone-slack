@@ -3,20 +3,22 @@ package main
 import (
 	"fmt"
 	"os"
+	"log"
 
-	"github.com/Sirupsen/logrus"
-	"github.com/joho/godotenv"
 	"github.com/urfave/cli"
 )
 
-var build = "0" // build number set at compile-time
+var (
+	version = "0.0.0"
+	build   = "0"
+)
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "slack plugin"
 	app.Usage = "slack plugin"
 	app.Action = run
-	app.Version = fmt.Sprintf("1.1.0+%s", build)
+	app.Version = fmt.Sprintf("%s+%s", version, build)
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "webhook",
@@ -148,22 +150,14 @@ func main() {
 			Usage:  "job started",
 			EnvVar: "DRONE_JOB_STARTED",
 		},
-		cli.StringFlag{
-			Name:  "env-file",
-			Usage: "source env file",
-		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
 func run(c *cli.Context) error {
-	if c.String("env-file") != "" {
-		_ = godotenv.Load(c.String("env-file"))
-	}
-
 	plugin := Plugin{
 		Repo: Repo{
 			Owner: c.String("repo.owner"),
