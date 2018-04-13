@@ -55,16 +55,27 @@ func RenderTrim(template string, playload interface{}) (string, error) {
 }
 
 var funcs = map[string]interface{}{
-	"uppercasefirst": uppercaseFirst,
-	"uppercase":      strings.ToUpper,
-	"lowercase":      strings.ToLower,
-	"duration":       toDuration,
-	"datetime":       toDatetime,
-	"success":        isSuccess,
-	"failure":        isFailure,
-	"truncate":       truncate,
-	"urlencode":      urlencode,
-	"since":          since,
+	"uppercasefirst":             uppercaseFirst,
+	"uppercase":                  strings.ToUpper,
+	"lowercase":                  strings.ToLower,
+	"duration":                   toDuration,
+	"datetime":                   toDatetime,
+	"emailStripDomain":           emailStripDomain,
+	"emailStripDomainAndToLower": emailStripDomainAndToLower,
+	"success":                    isSuccess,
+	"failure":                    isFailure,
+	"truncate":                   truncate,
+	"urlencode":                  urlencode,
+	"since":                      since,
+}
+
+func emailStripDomain(s string) string {
+	idx := strings.Index(s, "@")
+	return s[:idx]
+}
+
+func emailStripDomainAndToLower(s string) string {
+	return strings.ToLower(emailStripDomain(s))
 }
 
 func truncate(s string, len int) string {
