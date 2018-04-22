@@ -1,13 +1,12 @@
-FROM microsoft/nanoserver:latest
-MAINTAINER Drone.IO Community <drone-dev@googlegroups.com>
+# escape=`
+FROM microsoft/nanoserver:10.0.14393.1593
 
-ENV GODEBUG=netdns=go
+LABEL maintainer="Drone.IO Community <drone-dev@googlegroups.com>" `
+  org.label-schema.name="Drone Slack" `
+  org.label-schema.vendor="Drone.IO Community" `
+  org.label-schema.schema-version="1.0"
 
-LABEL org.label-schema.version=latest
-LABEL org.label-schema.vcs-url="https://github.com/drone-plugins/drone-slack.git"
-LABEL org.label-schema.name="Drone Slack"
-LABEL org.label-schema.vendor="Drone.IO Community"
-LABEL org.label-schema.schema-version="1.0"
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-ADD release/windows/amd64/drone-slack /bin/
-ENTRYPOINT [ "/bin/drone-slack" ]
+ADD release\drone-slack.exe c:\drone-slack.exe
+ENTRYPOINT [ "c:\\drone-slack.exe" ]
