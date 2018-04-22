@@ -1,0 +1,15 @@
+[[constraint]]
+  branch = "master"
+  name = "github.com/bluele/slack"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/drone/drone-template-lib"
+
+[[constraint]]
+  name = "github.com/urfave/cli"
+  version = "1.20.0"
+
+[prune]
+  go-tests = true
+  unused-packages = true

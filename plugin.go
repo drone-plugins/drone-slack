@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/bluele/slack"
+	"github.com/drone/drone-template-lib/template"
 )
 
 type (
@@ -78,10 +79,12 @@ func (p Plugin) Exec() error {
 		payload.LinkNames = "1"
 	}
 	if p.Config.Template != "" {
-		txt, err := RenderTrim(p.Config.Template, p)
+		txt, err := template.RenderTrim(p.Config.Template, p)
+
 		if err != nil {
 			return err
 		}
+
 		attachment.Text = txt
 	}
 
@@ -127,5 +130,6 @@ func prepend(prefix, s string) string {
 	if !strings.HasPrefix(s, prefix) {
 		return prefix + s
 	}
+
 	return s
 }
