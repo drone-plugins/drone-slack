@@ -40,6 +40,7 @@ type (
 		ImageURL  string
 		IconURL   string
 		IconEmoji string
+		LinkNames bool
 	}
 
 	Job struct {
@@ -74,7 +75,9 @@ func (p Plugin) Exec() error {
 	} else if p.Config.Channel != "" {
 		payload.Channel = prepend("#", p.Config.Channel)
 	}
-
+	if p.Config.LinkNames == true {
+		payload.LinkNames = "1"
+	}
 	if p.Config.Template != "" {
 		txt, err := template.RenderTrim(p.Config.Template, p)
 

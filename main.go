@@ -45,6 +45,11 @@ func main() {
 			Usage:  "slack template",
 			EnvVar: "PLUGIN_TEMPLATE",
 		},
+		cli.BoolFlag{
+			Name:   "link-names",
+			Usage:  "slack link names",
+			EnvVar: "PLUGIN_LINK_NAMES",
+		},
 		cli.StringFlag{
 			Name:   "image",
 			Usage:  "slack image url",
@@ -191,6 +196,7 @@ func run(c *cli.Context) error {
 			ImageURL:  c.String("image"),
 			IconURL:   c.String("icon.url"),
 			IconEmoji: c.String("icon.emoji"),
+			LinkNames: c.Bool("link_names"),
 		},
 	}
 
