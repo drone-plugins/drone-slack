@@ -46,7 +46,7 @@ func main() {
 			EnvVar: "PLUGIN_TEMPLATE",
 		},
 		cli.BoolFlag{
-			Name:   "link_names",
+			Name:   "link-names",
 			Usage:  "slack link names",
 			EnvVar: "PLUGIN_LINK_NAMES",
 		},
