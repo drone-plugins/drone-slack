@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"log"
+	"os"
 
 	"github.com/urfave/cli"
 )
@@ -64,6 +64,16 @@ func main() {
 			Name:   "icon.emoji",
 			Usage:  "slack emoji url",
 			EnvVar: "PLUGIN_ICON_EMOJI",
+		},
+		cli.StringFlag{
+			Name:   "s3-bucket",
+			Usage:  "s3 bucket",
+			EnvVar: "PLUGIN_S3_BUCKET",
+		},
+		cli.StringFlag{
+			Name:   "s3-users-key",
+			Usage:  "github to slack userMap s3 key",
+			EnvVar: "PLUGIN_S3_USERS_KEY",
 		},
 		cli.StringFlag{
 			Name:   "repo.owner",
@@ -163,6 +173,12 @@ func main() {
 }
 
 func run(c *cli.Context) error {
+	// Load name to slackname user mapping from s3
+	userMap, err := loadUserMapFromS3(c.String("s3-bucket"), c.String("s3-users-key"))
+	if err != nil {
+		return err
+	}
+
 	plugin := Plugin{
 		Repo: Repo{
 			Owner: c.String("repo.owner"),
@@ -197,6 +213,10 @@ func run(c *cli.Context) error {
 			IconURL:   c.String("icon.url"),
 			IconEmoji: c.String("icon.emoji"),
 			LinkNames: c.Bool("link_names"),
+		},
+		Computed: Computed{
+			AuthorSlack:    translateOrReturn(c.String("commit.author"), userMap),
+			RecipientSlack: translateOrReturn(c.String("recipient"), userMap),
 		},
 	}
 

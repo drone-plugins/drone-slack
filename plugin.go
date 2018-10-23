@@ -47,11 +47,17 @@ type (
 		Started int64
 	}
 
+	Computed struct {
+		AuthorSlack    string
+		RecipientSlack string
+	}
+
 	Plugin struct {
-		Repo   Repo
-		Build  Build
-		Config Config
-		Job    Job
+		Repo     Repo
+		Build    Build
+		Config   Config
+		Job      Job
+		Computed Computed
 	}
 )
 
@@ -70,8 +76,8 @@ func (p Plugin) Exec() error {
 	payload.IconUrl = p.Config.IconURL
 	payload.IconEmoji = p.Config.IconEmoji
 
-	if p.Config.Recipient != "" {
-		payload.Channel = prepend("@", p.Config.Recipient)
+	if p.Computed.RecipientSlack != "" {
+		payload.Channel = prepend("@", p.Computed.RecipientSlack)
 	} else if p.Config.Channel != "" {
 		payload.Channel = prepend("#", p.Config.Channel)
 	}
