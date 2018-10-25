@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"os"
 	"log"
+	"os"
+	"strings"
 
 	"github.com/urfave/cli"
 )
@@ -155,11 +157,35 @@ func main() {
 			Usage:  "job started",
 			EnvVar: "DRONE_JOB_STARTED",
 		},
+		cli.StringFlag{
+			Name:   "vars-file",
+			EnvVar: "PLUGIN_VARS_FILE",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func GetVarsFromFile(file string) map[string]string {
+	env := make(map[string]string)
+	f, err := os.Open(file)
+	if err != nil {
+		fmt.Println("[Warning]", err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		v := strings.SplitN(scanner.Text(), "=", 2)
+		env[strings.ToLower(v[0])] = v[1]
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Println("[Warning] read env file error")
+	}
+	return env
 }
 
 func run(c *cli.Context) error {
@@ -197,6 +223,7 @@ func run(c *cli.Context) error {
 			IconURL:   c.String("icon.url"),
 			IconEmoji: c.String("icon.emoji"),
 			LinkNames: c.Bool("link_names"),
+			Vars:      GetVarsFromFile(c.String("vars-file")),
 		},
 	}
 

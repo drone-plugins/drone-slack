@@ -41,6 +41,7 @@ type (
 		IconURL   string
 		IconEmoji string
 		LinkNames bool
+		Vars      map[string]string
 	}
 
 	Job struct {
