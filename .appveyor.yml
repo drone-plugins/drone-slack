@@ -11,6 +11,7 @@ environment:
     secure: '4YzzahbEiMZQJpOCOd1LAw=='
   DOCKER_PASSWORD:
     secure: 'VqO/G3Zfslu6zSLdwHKO+Q=='
+  GO111MODULE: on
 
 install:
   - ps: |
@@ -21,9 +22,6 @@ install:
 
 build_script:
   - ps: |
-      go get -u github.com/golang/dep/cmd/dep
-      dep ensure
-
       if ( $env:APPVEYOR_REPO_TAG -eq 'false' ) {
         go build -ldflags "-X main.build=$env:APPVEYOR_BUILD_VERSION" -a -o release/drone-slack.exe
       } else {
