@@ -3,29 +3,24 @@ workspace:
   path: src/github.com/drone-plugins/drone-slack
 
 pipeline:
-  deps:
-    image: golang:1.10
-    pull: true
-    commands:
-      - go get -u github.com/golang/dep/cmd/dep
-      - dep ensure
-      - dep status
-
   test:
-    image: golang:1.10
+    image: golang:1.11
     pull: true
+    environment:
+      - GO111MODULE=on
     commands:
       - go vet ./...
       - go test -cover ./...
 
   build_linux_amd64:
-    image: golang:1.10
+    image: golang:1.11
     pull: true
     group: build
     environment:
       - GOOS=linux
       - GOARCH=amd64
       - CGO_ENABLED=0
+      - GO111MODULE=on
     commands:
       - |
         if test "${DRONE_TAG}" = ""; then
@@ -35,13 +30,14 @@ pipeline:
         fi
 
   build_linux_i386:
-    image: golang:1.10
+    image: golang:1.11
     pull: true
     group: build
     environment:
       - GOOS=linux
       - GOARCH=386
       - CGO_ENABLED=0
+      - GO111MODULE=on
     commands:
       - |
         if test "${DRONE_TAG}" = ""; then
@@ -51,13 +47,14 @@ pipeline:
         fi
 
   build_linux_arm64:
-    image: golang:1.10
+    image: golang:1.11
     pull: true
     group: build
     environment:
       - GOOS=linux
       - GOARCH=arm64
       - CGO_ENABLED=0
+      - GO111MODULE=on
     commands:
       - |
         if test "${DRONE_TAG}" = ""; then
@@ -67,7 +64,7 @@ pipeline:
         fi
 
   build_linux_arm:
-    image: golang:1.10
+    image: golang:1.11
     pull: true
     group: build
     environment:
@@ -75,6 +72,7 @@ pipeline:
       - GOARCH=arm
       - CGO_ENABLED=0
       - GOARM=7
+      - GO111MODULE=on
     commands:
       - |
         if test "${DRONE_TAG}" = ""; then
