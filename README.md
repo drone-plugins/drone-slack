@@ -7,7 +7,6 @@
 [![](https://images.microbadger.com/badges/image/plugins/slack.svg)](https://microbadger.com/images/plugins/slack "Get your own image badge on microbadger.com")
 [![Go Doc](https://godoc.org/github.com/drone-plugins/drone-slack?status.svg)](http://godoc.org/github.com/drone-plugins/drone-slack)
 [![Go Report](https://goreportcard.com/badge/github.com/drone-plugins/drone-slack)](https://goreportcard.com/report/github.com/drone-plugins/drone-slack)
-[![](https://images.microbadger.com/badges/image/plugins/slack.svg)](https://microbadger.com/images/plugins/slack "Get your own image badge on microbadger.com")
 
 Drone plugin for sending Slack notifications. For the usage information and a listing of the available options please take a look at [the docs](http://plugins.drone.io/drone-plugins/drone-slack/).
 
