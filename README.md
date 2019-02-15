@@ -12,26 +12,31 @@ Drone plugin for sending Slack notifications. For the usage information and a li
 
 ## Build
 
-Build the binary with the following commands:
+Build the binary with the following command:
 
-```
-go build
+```console
+export GOOS=linux
+export GOARCH=amd64
+export CGO_ENABLED=0
+export GO111MODULE=on
+
+go build -v -a -tags netgo -o release/linux/amd64/drone-slack
 ```
 
 ## Docker
 
-Build the Docker image with the following commands:
+Build the Docker image with the following command:
 
-```
-GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -tags netgo -o release/linux/amd64/drone-slack
-docker build --rm -t plugins/slack .
+```console
+docker build \
+  --label org.label-schema.build-date=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+  --label org.label-schema.vcs-ref=$(git rev-parse --short HEAD) \
+  --file docker/Dockerfile.linux.amd64 --tag plugins/slack .
 ```
 
 ## Usage
 
-Execute from the working directory:
-
-```
+```console
 docker run --rm \
   -e SLACK_WEBHOOK=https://hooks.slack.com/services/... \
   -e PLUGIN_CHANNEL=foo \
@@ -45,5 +50,7 @@ docker run --rm \
   -e DRONE_BUILD_STATUS=success \
   -e DRONE_BUILD_LINK=http://github.com/octocat/hello-world \
   -e DRONE_TAG=1.0.0 \
+  -v $(pwd):$(pwd) \
+  -w $(pwd) \
   plugins/slack
 ```
