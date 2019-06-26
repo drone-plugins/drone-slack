@@ -196,7 +196,7 @@ func run(c *cli.Context) error {
 			ImageURL:  c.String("image"),
 			IconURL:   c.String("icon.url"),
 			IconEmoji: c.String("icon.emoji"),
-			LinkNames: c.Bool("link_names"),
+			LinkNames: c.Bool("link-names"),
 		},
 	}
 
