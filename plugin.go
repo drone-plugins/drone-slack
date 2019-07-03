@@ -15,23 +15,27 @@ type (
 	}
 
 	Build struct {
-		Tag          string
-		Event        string
-		Number       int
-		Commit       string
-		Ref          string
-		Branch       string
-		Author       string
-		AuthorEmail  string
-		AuthorAvatar string
-		AuthorName   string
-		Pull         string
-		Message      string
-		DeployTo     string
-		Status       string
-		Link         string
-		Started      int64
-		Created      int64
+		Tag      string
+		Event    string
+		Number   int
+		Commit   string
+		Ref      string
+		Branch   string
+		Author   Author
+		Pull     string
+		Message  string
+		DeployTo string
+		Status   string
+		Link     string
+		Started  int64
+		Created  int64
+	}
+
+	Author struct {
+		Username string
+		Name     string
+		Email    string
+		Avatar   string
 	}
 
 	Config struct {
@@ -57,6 +61,10 @@ type (
 		Job    Job
 	}
 )
+
+func (a Author) String() string {
+	return a.Username
+}
 
 func (p Plugin) Exec() error {
 	attachment := slack.Attachment{
