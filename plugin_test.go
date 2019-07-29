@@ -18,7 +18,6 @@ func TestFallbackMessage(t *testing.T) {
 	build := getTestBuild()
 
 	msg := fallback(repo, build)
-
 	expectedMessage := "success octocat/hello-world#7fd1a60b (master) by octocat"
 
 	assert.Equal(t, expectedMessage, msg)
