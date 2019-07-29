@@ -41,6 +41,9 @@ docker run --rm \
   -e DRONE_COMMIT_SHA=7fd1a60b01f91b314f59955a4e4d4e80d8edf11d \
   -e DRONE_COMMIT_BRANCH=master \
   -e DRONE_COMMIT_AUTHOR=octocat \
+  -e DRONE_COMMIT_AUTHOR_EMAIL=octocat@github.com \
+  -e DRONE_COMMIT_AUTHOR_AVATAR="https://avatars0.githubusercontent.com/u/583231?s=460&v=4" \
+  -e DRONE_COMMIT_AUTHOR_NAME="The Octocat" \
   -e DRONE_BUILD_NUMBER=1 \
   -e DRONE_BUILD_STATUS=success \
   -e DRONE_BUILD_LINK=http://github.com/octocat/hello-world \
