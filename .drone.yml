@@ -302,6 +302,9 @@ trigger:
   event:
   - push
 
+depends_on:
+- testing
+
 ---
 kind: pipeline
 name: notifications
