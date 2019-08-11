@@ -180,6 +180,9 @@ func main() {
 
 func run(c *cli.Context) error {
 	msg := c.String("commit.message")
+	// not checking the length here
+	// as split will always return at least one element
+	// check it if using more than the first element
 	splitMsg := strings.Split(msg, "\n")
 
 	plugin := Plugin{
