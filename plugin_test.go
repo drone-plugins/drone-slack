@@ -47,7 +47,10 @@ func getTestBuild() Build {
 		Branch:   "master",
 		Author:   author,
 		Pull:     "",
-		Message:  "Initial commit",
+		Message:  Message{
+			msg: "Initial commit",
+			Title: "Initial commit",
+		},
 		DeployTo: "",
 		Status:   "success",
 		Link:     "http://github.com/octocat/hello-world",

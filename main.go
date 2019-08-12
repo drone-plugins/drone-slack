@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/urfave/cli"
 )
@@ -179,12 +178,6 @@ func main() {
 }
 
 func run(c *cli.Context) error {
-	msg := c.String("commit.message")
-	// not checking the length here
-	// as split will always return at least one element
-	// check it if using more than the first element
-	splitMsg := strings.Split(msg, "\n")
-
 	plugin := Plugin{
 		Repo: Repo{
 			Owner: c.String("repo.owner"),
@@ -204,14 +197,12 @@ func run(c *cli.Context) error {
 				Email:    c.String("commit.author.email"),
 				Avatar:   c.String("commit.author.avatar"),
 			},
-			Pull:         c.String("commit.pull"),
-			Message:      msg,
-			MessageTitle: strings.TrimSpace(splitMsg[0]),
-			MessageBody:  strings.TrimSpace(strings.Join(splitMsg[1:], "\n")),
-			DeployTo:     c.String("build.deployTo"),
-			Link:         c.String("build.link"),
-			Started:      c.Int64("build.started"),
-			Created:      c.Int64("build.created"),
+			Pull:     c.String("commit.pull"),
+			Message:  newCommitMessage(c.String("commit.message")),
+			DeployTo: c.String("build.deployTo"),
+			Link:     c.String("build.link"),
+			Started:  c.Int64("build.started"),
+			Created:  c.Int64("build.created"),
 		},
 		Job: Job{
 			Started: c.Int64("job.started"),

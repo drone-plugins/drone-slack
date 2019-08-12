@@ -15,22 +15,20 @@ type (
 	}
 
 	Build struct {
-		Tag          string
-		Event        string
-		Number       int
-		Commit       string
-		Ref          string
-		Branch       string
-		Author       Author
-		Pull         string
-		Message      string
-		MessageTitle string
-		MessageBody  string
-		DeployTo     string
-		Status       string
-		Link         string
-		Started      int64
-		Created      int64
+		Tag      string
+		Event    string
+		Number   int
+		Commit   string
+		Ref      string
+		Branch   string
+		Author   Author
+		Pull     string
+		Message  Message
+		DeployTo string
+		Status   string
+		Link     string
+		Started  int64
+		Created  int64
 	}
 
 	Author struct {
@@ -38,6 +36,12 @@ type (
 		Name     string
 		Email    string
 		Avatar   string
+	}
+
+	Message struct {
+		msg   string
+		Title string
+		Body  string
 	}
 
 	Config struct {
@@ -66,6 +70,22 @@ type (
 
 func (a Author) String() string {
 	return a.Username
+}
+
+func newCommitMessage(m string) Message {
+	// not checking the length here
+	// as split will always return at least one element
+	// check it if using more than the first element
+	splitMsg := strings.Split(m, "\n")
+
+	return Message{
+		msg:   m,
+		Title: strings.TrimSpace(splitMsg[0]),
+		Body:  strings.TrimSpace(strings.Join(splitMsg[1:], "\n")),
+	}
+}
+func (m Message) String() string {
+	return m.msg
 }
 
 func (p Plugin) Exec() error {
