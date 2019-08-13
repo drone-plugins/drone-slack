@@ -307,6 +307,44 @@ depends_on:
 
 ---
 kind: pipeline
+type: ssh
+name: windows-1903-amd64
+
+platform:
+  os: windows
+
+server:
+  host: windows.1903.amd64.plugins.drone.ci
+  password:
+    from_secret: windows_password
+  user:
+    from_secret: windows_username
+
+steps:
+- name: build
+  commands:
+  # TODO use the new DRONE_SEMVER_SHORT environment variables to
+  # publish docker images for tag events.
+  - go build -o release/windows/amd64/drone-slack.exe
+  - docker login -u $env:USERNAME -p $env:PASSWORD
+  - docker build -f docker/Dockerfile.windows.1903.amd64 -t plugins/slack:windows-1903-amd64 .
+  - docker push plugins/slack:windows-1903-amd64
+  environment:
+    CGO_ENABLED: "0"
+    USERNAME:
+      from_secret: docker_username
+    PASSWORD:
+      from_secret: docker_password
+
+trigger:
+  event:
+  - push
+
+depends_on:
+- testing
+
+---
+kind: pipeline
 name: notifications
 
 platform:
@@ -341,6 +379,7 @@ trigger:
 
 depends_on:
 - windows-1809-amd64
+- windows-1903-amd64
 - linux-amd64
 - linux-arm64
 - linux-arm
