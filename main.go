@@ -198,7 +198,7 @@ func run(c *cli.Context) error {
 				Avatar:   c.String("commit.author.avatar"),
 			},
 			Pull:     c.String("commit.pull"),
-			Message:  c.String("commit.message"),
+			Message:  newCommitMessage(c.String("commit.message")),
 			DeployTo: c.String("build.deployTo"),
 			Link:     c.String("build.link"),
 			Started:  c.Int64("build.started"),

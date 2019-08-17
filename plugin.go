@@ -23,7 +23,7 @@ type (
 		Branch   string
 		Author   Author
 		Pull     string
-		Message  string
+		Message  Message
 		DeployTo string
 		Status   string
 		Link     string
@@ -36,6 +36,12 @@ type (
 		Name     string
 		Email    string
 		Avatar   string
+	}
+
+	Message struct {
+		msg   string
+		Title string
+		Body  string
 	}
 
 	Config struct {
@@ -66,9 +72,24 @@ func (a Author) String() string {
 	return a.Username
 }
 
+func newCommitMessage(m string) Message {
+	// not checking the length here
+	// as split will always return at least one element
+	// check it if using more than the first element
+	splitMsg := strings.Split(m, "\n")
+
+	return Message{
+		msg:   m,
+		Title: strings.TrimSpace(splitMsg[0]),
+		Body:  strings.TrimSpace(strings.Join(splitMsg[1:], "\n")),
+	}
+}
+func (m Message) String() string {
+	return m.msg
+}
+
 func (p Plugin) Exec() error {
 	attachment := slack.Attachment{
-		Text:       message(p.Repo, p.Build),
 		Fallback:   fallback(p.Repo, p.Build),
 		Color:      color(p.Build),
 		MarkdownIn: []string{"text", "fallback"},
@@ -90,17 +111,21 @@ func (p Plugin) Exec() error {
 		payload.LinkNames = "1"
 	}
 	if p.Config.Template != "" {
-		txt, err := template.RenderTrim(p.Config.Template, p)
-
+		var err error
+		attachment.Text, err = templateMessage(p.Config.Template, p)
 		if err != nil {
 			return err
 		}
-
-		attachment.Text = txt
+	} else {
+		attachment.Text = message(p.Repo, p.Build)
 	}
 
 	client := slack.NewWebHook(p.Config.Webhook)
 	return client.PostMessage(&payload)
+}
+
+func templateMessage(t string, plugin Plugin) (string, error) {
+	return template.RenderTrim(t, plugin)
 }
 
 func message(repo Repo, build Build) string {
