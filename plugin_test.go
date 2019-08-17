@@ -3,6 +3,46 @@ package main
 import "testing"
 import "gotest.tools/assert"
 
+func TestNewCommitMessage(t *testing.T) {
+	testCases := map[string]struct {
+		Msg    string
+		Expect Message
+	}{
+		"Empty Message": {
+			Msg:    "",
+			Expect: Message{},
+		},
+		"Title Only": {
+			Msg: "title with space",
+			Expect: Message{
+				msg:   "title with space",
+				Title: "title with space",
+				Body:  "",
+			},
+		},
+		"Title and Body": {
+			Msg: "Title with space\nBody with space",
+			Expect: Message{
+				msg:   "Title with space\nBody with space",
+				Title: "Title with space",
+				Body:  "Body with space",
+			},
+		},
+		"Empty Second Line": {
+			Msg: "Title with space\n\nBody with space",
+			Expect: Message{
+				msg:   "Title with space\n\nBody with space",
+				Title: "Title with space",
+				Body:  "Body with space",
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		assert.Equal(t, testCase.Expect, newCommitMessage(testCase.Msg), name)
+	}
+}
+
 func TestDefaultMessage(t *testing.T) {
 	repo := getTestRepo()
 	build := getTestBuild()
@@ -21,6 +61,29 @@ func TestFallbackMessage(t *testing.T) {
 	expectedMessage := "success octocat/hello-world#7fd1a60b (master) by octocat"
 
 	assert.Equal(t, expectedMessage, msg)
+}
+
+func TestTemplateMessage(t *testing.T) {
+	plugin := getTestPlugin()
+
+	msg, err := templateMessage(plugin.Config.Template, plugin)
+	assert.NilError(t, err, "should create message by template without error")
+	expectedMessage := `Message Template:
+Initial commit
+
+Message body
+Initial commit
+Message body`
+
+	assert.Equal(t, expectedMessage, msg)
+}
+
+func getTestPlugin() Plugin {
+	return Plugin{
+		Repo:   getTestRepo(),
+		Build:  getTestBuild(),
+		Config: getTestConfig(),
+	}
 }
 
 func getTestRepo() Repo {
@@ -47,14 +110,20 @@ func getTestBuild() Build {
 		Branch:   "master",
 		Author:   author,
 		Pull:     "",
-		Message:  Message{
-			msg: "Initial commit",
-			Title: "Initial commit",
-		},
+		Message:  newCommitMessage("Initial commit\n\nMessage body"),
 		DeployTo: "",
 		Status:   "success",
 		Link:     "http://github.com/octocat/hello-world",
 		Started:  1546340400, // 2019-01-01 12:00:00
 		Created:  1546340400, // 2019-01-01 12:00:00
+	}
+}
+
+func getTestConfig() Config {
+	return Config{
+		Template: `Message Template:
+{{build.message}}
+{{build.message.title}}
+{{build.message.body}}`,
 	}
 }

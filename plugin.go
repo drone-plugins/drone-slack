@@ -90,7 +90,6 @@ func (m Message) String() string {
 
 func (p Plugin) Exec() error {
 	attachment := slack.Attachment{
-		Text:       message(p.Repo, p.Build),
 		Fallback:   fallback(p.Repo, p.Build),
 		Color:      color(p.Build),
 		MarkdownIn: []string{"text", "fallback"},
@@ -112,17 +111,21 @@ func (p Plugin) Exec() error {
 		payload.LinkNames = "1"
 	}
 	if p.Config.Template != "" {
-		txt, err := template.RenderTrim(p.Config.Template, p)
-
+		var err error
+		attachment.Text, err = templateMessage(p.Config.Template, p)
 		if err != nil {
 			return err
 		}
-
-		attachment.Text = txt
+	} else {
+		attachment.Text = message(p.Repo, p.Build)
 	}
 
 	client := slack.NewWebHook(p.Config.Webhook)
 	return client.PostMessage(&payload)
+}
+
+func templateMessage(t string, plugin Plugin) (string, error) {
+	return template.RenderTrim(t, plugin)
 }
 
 func message(repo Repo, build Build) string {
