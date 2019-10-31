@@ -125,7 +125,7 @@ func (p Plugin) Exec() error {
 }
 
 func templateMessage(t string, plugin Plugin) (string, error) {
-	return template.RenderTrim(t, plugin)
+	return template.Render(t, plugin)
 }
 
 func message(repo Repo, build Build) string {
