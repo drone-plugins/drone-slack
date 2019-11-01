@@ -125,7 +125,8 @@ func (p Plugin) Exec() error {
 }
 
 func templateMessage(t string, plugin Plugin) (string, error) {
-	return template.Render(t, plugin)
+	t = strings.Replace(t, "\\n", "\n", -1)
+	return template.RenderTrim(t, plugin)
 }
 
 func message(repo Repo, build Build) string {
