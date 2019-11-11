@@ -173,7 +173,7 @@ func main() {
 		},
 	}
 
-	if _, err := os.Stat("/run/drone/env"); err != nil {
+	if _, err := os.Stat("/run/drone/env"); err == nil {
 		godotenv.Overload("/run/drone/env")
 	}
 
