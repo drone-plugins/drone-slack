@@ -14,12 +14,6 @@ var (
 	build   = "0"
 )
 
-func init() {
-	// this is how kubernetes passes environment variables
-	// to the pipeline step.
-	godotenv.Load("/run/drone/env")
-}
-
 func main() {
 	app := cli.NewApp()
 	app.Name = "slack plugin"
@@ -177,6 +171,10 @@ func main() {
 			Usage:  "job started",
 			EnvVar: "DRONE_JOB_STARTED",
 		},
+	}
+
+	if _, err := os.Stat("/run/drone/env"); err != nil {
+		godotenv.Overload("/run/drone/env")
 	}
 
 	if err := app.Run(os.Args); err != nil {
