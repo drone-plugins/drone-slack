@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/urfave/cli"
 )
 
@@ -12,6 +13,12 @@ var (
 	version = "0.0.0"
 	build   = "0"
 )
+
+func init() {
+	// this is how kubernetes passes environment variables
+	// to the pipeline step.
+	godotenv.Load("/run/drone/env")
+}
 
 func main() {
 	app := cli.NewApp()
