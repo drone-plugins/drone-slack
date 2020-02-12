@@ -1,7 +1,10 @@
 package main
 
-import "testing"
-import "gotest.tools/assert"
+import (
+	"testing"
+
+	"gotest.tools/assert"
+)
 
 func TestNewCommitMessage(t *testing.T) {
 	testCases := map[string]struct {
@@ -53,7 +56,7 @@ func TestDefaultMessage(t *testing.T) {
 	assert.Equal(t, expectedMessage, msg)
 }
 
-func TestFallbackMessage(t *testing.T) {
+func TestDefaultFallbackMessage(t *testing.T) {
 	repo := getTestRepo()
 	build := getTestBuild()
 
@@ -74,6 +77,19 @@ Initial commit
 Message body
 Initial commit
 Message body`
+
+	assert.Equal(t, expectedMessage, msg)
+}
+
+func TestTemplateFallbackMessage(t *testing.T) {
+	plugin := getTestPlugin()
+
+	msg, err := templateMessage(plugin.Config.TemplateFallback, plugin)
+	assert.NilError(t, err, "should create message by template without error")
+	expectedMessage := `Message Template Fallback:
+Initial commit
+master
+success`
 
 	assert.Equal(t, expectedMessage, msg)
 }
@@ -120,10 +136,17 @@ func getTestBuild() Build {
 }
 
 func getTestConfig() Config {
-	return Config{
-		Template: `Message Template:
+	t := `Message Template:
 {{build.message}}
 {{build.message.title}}
-{{build.message.body}}`,
+{{build.message.body}}`
+
+	tf := `Message Template Fallback:
+{{build.message.title}}
+{{build.branch}}
+{{build.status}}`
+	return Config{
+		Template:         t,
+		TemplateFallback: tf,
 	}
 }

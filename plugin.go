@@ -45,15 +45,16 @@ type (
 	}
 
 	Config struct {
-		Webhook   string
-		Channel   string
-		Recipient string
-		Username  string
-		Template  string
-		ImageURL  string
-		IconURL   string
-		IconEmoji string
-		LinkNames bool
+		Webhook          string
+		Channel          string
+		Recipient        string
+		Username         string
+		Template         string
+		TemplateFallback string
+		ImageURL         string
+		IconURL          string
+		IconEmoji        string
+		LinkNames        bool
 	}
 
 	Job struct {
@@ -90,10 +91,18 @@ func (m Message) String() string {
 
 func (p Plugin) Exec() error {
 	attachment := slack.Attachment{
-		Fallback:   fallback(p.Repo, p.Build),
 		Color:      color(p.Build),
 		MarkdownIn: []string{"text", "fallback"},
 		ImageURL:   p.Config.ImageURL,
+	}
+	if p.Config.TemplateFallback != "" {
+		var err error
+		attachment.Fallback, err = templateMessage(p.Config.TemplateFallback, p)
+		if err != nil {
+			return err
+		}
+	} else {
+		attachment.Fallback = fallback(p.Repo, p.Build)
 	}
 
 	payload := slack.WebHookPostPayload{}
