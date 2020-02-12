@@ -145,6 +145,7 @@ func getTestConfig() Config {
 {{build.message.title}}
 {{build.branch}}
 {{build.status}}`
+
 	return Config{
 		Template:         t,
 		TemplateFallback: tf,
