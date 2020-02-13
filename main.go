@@ -46,6 +46,11 @@ func main() {
 			Usage:  "slack template",
 			EnvVar: "PLUGIN_TEMPLATE",
 		},
+		cli.StringFlag{
+			Name:   "fallback",
+			Usage:  "slack fallback",
+			EnvVar: "PLUGIN_FALLBACK",
+		},
 		cli.BoolFlag{
 			Name:   "link-names",
 			Usage:  "slack link names",

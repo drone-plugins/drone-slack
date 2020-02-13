@@ -45,16 +45,16 @@ type (
 	}
 
 	Config struct {
-		Webhook          string
-		Channel          string
-		Recipient        string
-		Username         string
-		Template         string
-		TemplateFallback string
-		ImageURL         string
-		IconURL          string
-		IconEmoji        string
-		LinkNames        bool
+		Webhook   string
+		Channel   string
+		Recipient string
+		Username  string
+		Template  string
+		Fallback  string
+		ImageURL  string
+		IconURL   string
+		IconEmoji string
+		LinkNames bool
 	}
 
 	Job struct {
@@ -95,9 +95,9 @@ func (p Plugin) Exec() error {
 		MarkdownIn: []string{"text", "fallback"},
 		ImageURL:   p.Config.ImageURL,
 	}
-	if p.Config.TemplateFallback != "" {
+	if p.Config.Fallback != "" {
 		var err error
-		attachment.Fallback, err = templateMessage(p.Config.TemplateFallback, p)
+		attachment.Fallback, err = templateMessage(p.Config.Fallback, p)
 		if err != nil {
 			return err
 		}

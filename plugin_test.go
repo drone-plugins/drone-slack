@@ -84,7 +84,7 @@ Message body`
 func TestTemplateFallbackMessage(t *testing.T) {
 	plugin := getTestPlugin()
 
-	msg, err := templateMessage(plugin.Config.TemplateFallback, plugin)
+	msg, err := templateMessage(plugin.Config.Fallback, plugin)
 	assert.NilError(t, err, "should create message by template without error")
 	expectedMessage := `Message Template Fallback:
 Initial commit
@@ -147,7 +147,7 @@ func getTestConfig() Config {
 {{build.status}}`
 
 	return Config{
-		Template:         t,
-		TemplateFallback: tf,
+		Template: t,
+		Fallback: tf,
 	}
 }
