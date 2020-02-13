@@ -95,10 +95,10 @@ func (p Plugin) Exec() error {
 		MarkdownIn: []string{"text", "fallback"},
 		ImageURL:   p.Config.ImageURL,
 	}
-	if p.Config.Color == "" {
-		attachment.Color = color(p.Build)
+	if p.Config.Color != "" {
+		attachment.Color = p.Config.Color
 	} else {
-		attachment.Color = checkAndSelectColor(p.Config.Color)
+		attachment.Color = color(p.Build)
 	}
 	if p.Config.TemplateFallback != "" {
 		var err error
@@ -174,15 +174,6 @@ func color(build Build) string {
 	default:
 		return "warning"
 	}
-}
-
-func checkAndSelectColor(color string) string {
-	for _, c := range []string{"good", "danger", "warning"} {
-		if c == color {
-			return color
-		}
-	}
-	return "warning"
 }
 
 func prepend(prefix, s string) string {
