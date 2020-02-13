@@ -223,6 +223,7 @@ func run(c *cli.Context) error {
 			Recipient: c.String("recipient"),
 			Username:  c.String("username"),
 			Template:  c.String("template"),
+			Fallback:  c.String("fallback"),
 			ImageURL:  c.String("image"),
 			IconURL:   c.String("icon.url"),
 			IconEmoji: c.String("icon.emoji"),
