@@ -96,11 +96,11 @@ func (p Plugin) Exec() error {
 		ImageURL:   p.Config.ImageURL,
 	}
 	if p.Config.Fallback != "" {
-		var err error
-		attachment.Fallback, err = templateMessage(p.Config.Fallback, p)
+		f, err := templateMessage(p.Config.Fallback, p)
 		if err != nil {
 			return err
 		}
+		attachment.Fallback = f
 	} else {
 		attachment.Fallback = fallback(p.Repo, p.Build)
 	}
