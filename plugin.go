@@ -50,6 +50,7 @@ type (
 		Recipient string
 		Username  string
 		Template  string
+		Fallback  string
 		ImageURL  string
 		IconURL   string
 		IconEmoji string
@@ -90,10 +91,18 @@ func (m Message) String() string {
 
 func (p Plugin) Exec() error {
 	attachment := slack.Attachment{
-		Fallback:   fallback(p.Repo, p.Build),
 		Color:      color(p.Build),
 		MarkdownIn: []string{"text", "fallback"},
 		ImageURL:   p.Config.ImageURL,
+	}
+	if p.Config.Fallback != "" {
+		f, err := templateMessage(p.Config.Fallback, p)
+		if err != nil {
+			return err
+		}
+		attachment.Fallback = f
+	} else {
+		attachment.Fallback = fallback(p.Repo, p.Build)
 	}
 
 	payload := slack.WebHookPostPayload{}
