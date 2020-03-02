@@ -54,7 +54,7 @@ type (
 		ImageURL  string
 		IconURL   string
 		IconEmoji string
-    Color     string
+		Color     string
 		LinkNames bool
 	}
 
