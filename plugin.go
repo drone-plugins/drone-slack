@@ -54,6 +54,7 @@ type (
 		ImageURL  string
 		IconURL   string
 		IconEmoji string
+		Color     string
 		LinkNames bool
 	}
 
@@ -91,9 +92,12 @@ func (m Message) String() string {
 
 func (p Plugin) Exec() error {
 	attachment := slack.Attachment{
-		Color:      color(p.Build),
-		MarkdownIn: []string{"text", "fallback"},
+		Color:      p.Config.Color,
 		ImageURL:   p.Config.ImageURL,
+		MarkdownIn: []string{"text", "fallback"},
+	}
+	if p.Config.Color == "" {
+		attachment.Color = color(p.Build)
 	}
 	if p.Config.Fallback != "" {
 		f, err := templateMessage(p.Config.Fallback, p)
