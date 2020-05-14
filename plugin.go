@@ -137,6 +137,14 @@ func (p Plugin) Exec() error {
 	return client.PostMessage(&payload)
 }
 
+func detectRef(build Build) string {
+	if build.Commit != "" {
+		return build.Commit[:8]
+	}
+
+	return build.Tag
+}
+
 func templateMessage(t string, plugin Plugin) (string, error) {
 	return template.RenderTrim(t, plugin)
 }
@@ -147,7 +155,7 @@ func message(repo Repo, build Build) string {
 		build.Link,
 		repo.Owner,
 		repo.Name,
-		build.Commit[:8],
+		detectRef(build),
 		build.Branch,
 		build.Author,
 	)
@@ -158,7 +166,7 @@ func fallback(repo Repo, build Build) string {
 		build.Status,
 		repo.Owner,
 		repo.Name,
-		build.Commit[:8],
+		detectRef(build),
 		build.Branch,
 		build.Author,
 	)
