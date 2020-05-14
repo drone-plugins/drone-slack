@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -235,6 +236,10 @@ func run(c *cli.Context) error {
 			Color:     c.String("color"),
 			LinkNames: c.Bool("link-names"),
 		},
+	}
+
+	if plugin.Config.Webhook == "" {
+		return errors.New("Missing webhook")
 	}
 
 	return plugin.Exec()
