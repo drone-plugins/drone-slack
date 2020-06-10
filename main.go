@@ -88,6 +88,11 @@ func main() {
 			EnvVar: "DRONE_REPO_NAME",
 		},
 		cli.StringFlag{
+			Name:   "repo.branch",
+			Usage:  "default repository branch name",
+			EnvVar: "DRONE_REPO_BRANCH",
+		},
+		cli.StringFlag{
 			Name:   "commit.sha",
 			Usage:  "git commit sha",
 			EnvVar: "DRONE_COMMIT_SHA",
@@ -173,6 +178,16 @@ func main() {
 			EnvVar: "DRONE_TAG",
 		},
 		cli.StringFlag{
+			Name:   "source.branch",
+			Usage:  "source branch for the pull request",
+			EnvVar: "DRONE_SOURCE_BRANCH",
+		},
+		cli.StringFlag{
+			Name:   "target.branch",
+			Usage:  "target branch for the pull request",
+			EnvVar: "DRONE_TARGET_BRANCH",
+		},
+		cli.StringFlag{
 			Name:   "build.deployTo",
 			Usage:  "environment deployed to",
 			EnvVar: "DRONE_DEPLOY_TO",
@@ -196,8 +211,9 @@ func main() {
 func run(c *cli.Context) error {
 	plugin := Plugin{
 		Repo: Repo{
-			Owner: c.String("repo.owner"),
-			Name:  c.String("repo.name"),
+			Owner:  c.String("repo.owner"),
+			Name:   c.String("repo.name"),
+			Branch: c.String("repo.branch"),
 		},
 		Build: Build{
 			Tag:    c.String("build.tag"),
@@ -219,6 +235,12 @@ func run(c *cli.Context) error {
 			Link:     c.String("build.link"),
 			Started:  c.Int64("build.started"),
 			Created:  c.Int64("build.created"),
+		},
+		Source: Source{
+			Branch: c.String("source.branch"),
+		},
+		Target: Target{
+			Branch: c.String("target.branch"),
 		},
 		Job: Job{
 			Started: c.Int64("job.started"),

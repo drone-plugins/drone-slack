@@ -10,8 +10,9 @@ import (
 
 type (
 	Repo struct {
-		Owner string
-		Name  string
+		Owner  string
+		Name   string
+		Branch string
 	}
 
 	Build struct {
@@ -29,6 +30,14 @@ type (
 		Link     string
 		Started  int64
 		Created  int64
+	}
+
+	Source struct {
+		Branch string
+	}
+
+	Target struct {
+		Branch string
 	}
 
 	Author struct {
@@ -65,6 +74,8 @@ type (
 	Plugin struct {
 		Repo   Repo
 		Build  Build
+		Source Source
+		Target Target
 		Config Config
 		Job    Job
 	}
