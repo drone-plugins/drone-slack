@@ -69,5 +69,9 @@ branches:
           - continuous-integration/drone/pr
       enforce_admins: false
       restrictions:
+        apps:
+          - renovate
         users: []
-        teams: []
+        teams:
+          - Admins
+          - Maintainers
