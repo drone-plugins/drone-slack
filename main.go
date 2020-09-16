@@ -182,6 +182,22 @@ func main() {
 			Usage:  "job started",
 			EnvVar: "DRONE_JOB_STARTED",
 		},
+
+		cli.StringFlag{
+			Name:   "build.failedStages",
+			Usage:  "comma separated list of failed stages",
+			EnvVar: "DRONE_FAILED_STAGES",
+		},
+		cli.StringFlag{
+			Name:   "build.failedSteps",
+			Usage:  "comma separated list of failed steps",
+			EnvVar: "DRONE_FAILED_STEPS",
+		},
+		cli.BoolFlag{
+			Name:   "debug",
+			Usage:  "enable debug logs",
+			EnvVar: "DEBUG",
+		},
 	}
 
 	if _, err := os.Stat("/run/drone/env"); err == nil {
@@ -200,13 +216,15 @@ func run(c *cli.Context) error {
 			Name:  c.String("repo.name"),
 		},
 		Build: Build{
-			Tag:    c.String("build.tag"),
-			Number: c.Int("build.number"),
-			Event:  c.String("build.event"),
-			Status: c.String("build.status"),
-			Commit: c.String("commit.sha"),
-			Ref:    c.String("commit.ref"),
-			Branch: c.String("commit.branch"),
+			Tag:          c.String("build.tag"),
+			Number:       c.Int("build.number"),
+			Event:        c.String("build.event"),
+			Status:       c.String("build.status"),
+			FailedSteps:  c.String("build.failedSteps"),
+			FailedStages: c.String("build.failedStages"),
+			Commit:       c.String("commit.sha"),
+			Ref:          c.String("commit.ref"),
+			Branch:       c.String("commit.branch"),
 			Author: Author{
 				Username: c.String("commit.author"),
 				Name:     c.String("commit.author.name"),
@@ -235,6 +253,7 @@ func run(c *cli.Context) error {
 			IconEmoji: c.String("icon.emoji"),
 			Color:     c.String("color"),
 			LinkNames: c.Bool("link-names"),
+			Debug:     c.Bool("debug"),
 		},
 	}
 

@@ -15,20 +15,22 @@ type (
 	}
 
 	Build struct {
-		Tag      string
-		Event    string
-		Number   int
-		Commit   string
-		Ref      string
-		Branch   string
-		Author   Author
-		Pull     string
-		Message  Message
-		DeployTo string
-		Status   string
-		Link     string
-		Started  int64
-		Created  int64
+		Tag          string
+		Event        string
+		Number       int
+		Commit       string
+		Ref          string
+		Branch       string
+		Author       Author
+		Pull         string
+		Message      Message
+		DeployTo     string
+		Status       string
+		FailedSteps  string
+		FailedStages string
+		Link         string
+		Started      int64
+		Created      int64
 	}
 
 	Author struct {
@@ -56,6 +58,7 @@ type (
 		IconEmoji string
 		Color     string
 		LinkNames bool
+		Debug     bool
 	}
 
 	Job struct {
@@ -133,6 +136,9 @@ func (p Plugin) Exec() error {
 		attachment.Text = message(p.Repo, p.Build)
 	}
 
+	if p.Config.Debug {
+		fmt.Printf("Sending msg: %s", attachment.Text)
+	}
 	client := slack.NewWebHook(p.Config.Webhook)
 	return client.PostMessage(&payload)
 }

@@ -50,3 +50,58 @@ docker run --rm \
   -e DRONE_TAG=1.0.0 \
   plugins/slack
 ```
+
+### Template
+Add the `PLUGIN_TEMPLATE` variable and set it to a valid Go template:
+
+```
+docker run --rm \
+  -e SLACK_WEBHOOK=https://hooks.slack.com/services/... \
+  -e PLUGIN_CHANNEL=foo \
+  -e PLUGIN_USERNAME=drone \
+  -e DRONE_REPO_OWNER=octocat \
+  -e DRONE_REPO_NAME=hello-world \
+  -e DRONE_COMMIT_SHA=7fd1a60b01f91b314f59955a4e4d4e80d8edf11d \
+  -e DRONE_COMMIT_BRANCH=master \
+  -e DRONE_COMMIT_AUTHOR=octocat \
+  -e DRONE_COMMIT_AUTHOR_EMAIL=octocat@github.com \
+  -e DRONE_COMMIT_AUTHOR_AVATAR="https://avatars0.githubusercontent.com/u/583231?s=460&v=4" \
+  -e DRONE_COMMIT_AUTHOR_NAME="The Octocat" \
+  -e DRONE_BUILD_NUMBER=1 \
+  -e DRONE_BUILD_STATUS=success \
+  -e DRONE_BUILD_LINK=http://github.com/octocat/hello-world \
+  -e DRONE_TAG=1.0.0 \
+  -e PLUGIN_TEMPLATE='{{#success build.status}} Deployed to staging in {{since build.created}} from Drone.
+        {{else}} Failed to deployed at step "{{build.failedSteps}}" after {{since build.created}}.
+        {{/success}}' \
+  -e DEBUG=true \
+  plugins/slack
+```
+
+### Debug
+Add the `DEBUG=true variable`:
+
+```
+docker run --rm \
+  -e SLACK_WEBHOOK=https://hooks.slack.com/services/... \
+  -e PLUGIN_CHANNEL=foo \
+  -e PLUGIN_USERNAME=drone \
+  -e DRONE_REPO_OWNER=octocat \
+  -e DRONE_REPO_NAME=hello-world \
+  -e DRONE_COMMIT_SHA=7fd1a60b01f91b314f59955a4e4d4e80d8edf11d \
+  -e DRONE_COMMIT_BRANCH=master \
+  -e DRONE_COMMIT_AUTHOR=octocat \
+  -e DRONE_COMMIT_AUTHOR_EMAIL=octocat@github.com \
+  -e DRONE_COMMIT_AUTHOR_AVATAR="https://avatars0.githubusercontent.com/u/583231?s=460&v=4" \
+  -e DRONE_COMMIT_AUTHOR_NAME="The Octocat" \
+  -e DRONE_BUILD_NUMBER=1 \
+  -e DRONE_BUILD_STATUS=failed \
+  -e DRONE_BUILD_LINK=http://github.com/octocat/hello-world \
+  -e DRONE_TAG=1.0.0 \
+  -e DRONE_FAILED_STEPS=clone \
+  -e PLUGIN_TEMPLATE='{{#success build.status}} Deployed to staging in {{since build.created}} from Drone.
+        {{else}} Failed to deployed at step "{{build.failedSteps}}" after {{since build.created}}.
+        {{/success}}' \
+  -e DEBUG=true \
+  plugins/slack
+```
