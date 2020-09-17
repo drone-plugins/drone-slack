@@ -91,7 +91,7 @@ func (p *Plugin) Execute() error {
 	}).Info("sending message")
 	err := slack.PostWebhookCustomHTTPContext(p.network.Context, p.settings.Webhook, p.network.Client, &msg)
 	if err != nil {
-		fmt.Errorf("could not send webhook: %w", err)
+		return fmt.Errorf("could not send webhook: %w", err)
 	}
 
 	return nil
