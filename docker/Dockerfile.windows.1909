@@ -1,13 +1,10 @@
 # escape=`
-FROM mcr.microsoft.com/windows/nanoserver:1903
-USER ContainerAdministrator
-
-ENV GODEBUG=netdns=go
+FROM plugins/base:windows-1909-amd64
 
 LABEL maintainer="Drone.IO Community <drone-dev@googlegroups.com>" `
   org.label-schema.name="Drone Slack" `
   org.label-schema.vendor="Drone.IO Community" `
   org.label-schema.schema-version="1.0"
 
-ADD release/windows/amd64/drone-slack.exe C:/drone-slack.exe
-ENTRYPOINT [ "C:\\drone-slack.exe" ]
+ADD release/windows/amd64/drone-slack.exe C:/bin/drone-slack.exe
+ENTRYPOINT [ "C:\\bin\\drone-slack.exe" ]

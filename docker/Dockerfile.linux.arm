@@ -6,4 +6,4 @@ LABEL maintainer="Drone.IO Community <drone-dev@googlegroups.com>" \
   org.label-schema.schema-version="1.0"
 
 ADD release/linux/arm/drone-slack /bin/
-ENTRYPOINT ["/bin/drone-slack"]
+ENTRYPOINT [ "/bin/drone-slack" ]
