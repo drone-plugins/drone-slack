@@ -8,6 +8,6 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/sirupsen/logrus v1.6.0
 	github.com/slack-go/slack v0.6.6
-	github.com/urfave/cli/v2 v2.2.0
+	github.com/urfave/cli/v2 v2.3.0
 	gotest.tools/v3 v3.0.2
 )
