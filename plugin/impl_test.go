@@ -14,10 +14,16 @@ import (
 )
 
 func TestDefaultMessage(t *testing.T) {
-	msg := message(getTestPipeline())
+	msg := defaultMessage(getTestPipeline())
 	expectedMessage := "*success* <http://github.com/octocat/hello-world|octocat/hello-world#7fd1a60b> (master) by octocat"
 
 	assert.Equal(t, expectedMessage, msg)
+}
+
+func TestShouldSendMessage(t *testing.T){
+	assert.Equal(t, shouldSendMessage("does not match", "[A-Z].*"), false)
+	assert.Equal(t, shouldSendMessage("Starts with capital letter - will match", "[A-Z].*"), true)
+	assert.Equal(t, shouldSendMessage("The regexp is empty string - should still pass", ""), true)
 }
 
 func TestDefaultFallbackMessage(t *testing.T) {

@@ -8,6 +8,7 @@ package plugin
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/drone-plugins/drone-plugin-lib/drone"
@@ -19,16 +20,17 @@ import (
 type (
 	// Settings for the plugin.
 	Settings struct {
-		Webhook   string
-		Channel   string
-		Recipient string
-		Username  string
-		Template  string
-		Fallback  string
-		ImageURL  string
-		IconURL   string
-		IconEmoji string
-		Color     string
+		Webhook           string
+		Channel           string
+		Recipient         string
+		Username          string
+		Template          string
+		Fallback          string
+		ImageURL          string
+		IconURL           string
+		IconEmoji         string
+		Color             string
+		CommitAllowRegexp string
 	}
 )
 
@@ -43,6 +45,10 @@ func (p *Plugin) Validate() error {
 
 // Execute provides the implementation of the plugin.
 func (p *Plugin) Execute() error {
+	if !shouldSendMessage(p.pipeline.Commit.Message.String(), p.settings.CommitAllowRegexp) {
+		return nil
+	}
+
 	attachment := slack.Attachment{
 		Color:      p.settings.Color,
 		ImageURL:   p.settings.ImageURL,
@@ -82,7 +88,7 @@ func (p *Plugin) Execute() error {
 			return fmt.Errorf("could not create template message: %w", err)
 		}
 	} else {
-		attachment.Text = message(p.pipeline)
+		attachment.Text = defaultMessage(p.pipeline)
 	}
 
 	logrus.WithFields(logrus.Fields{
@@ -109,7 +115,17 @@ func templateMessage(t string, p drone.Pipeline) (string, error) {
 	return template.RenderTrim(t, p)
 }
 
-func message(p drone.Pipeline) string {
+
+func shouldSendMessage(msg string, allowRegexp string) bool{
+	if allowRegexp == "" {
+		return true
+	}else{
+		var mustMatch = regexp.MustCompile(allowRegexp)
+		return mustMatch.MatchString(msg)
+	}
+}
+
+func defaultMessage(p drone.Pipeline) string {
 	return fmt.Sprintf("*%s* <%s|%s/%s#%s> (%s) by %s",
 		p.Build.Status,
 		p.Build.Link,
