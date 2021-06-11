@@ -44,6 +44,12 @@ func settingsFlags(settings *plugin.Settings) []cli.Flag {
 			Destination: &settings.Template,
 		},
 		&cli.StringFlag{
+			Name:        "only_allow_commits_regexp",
+			Usage:       "regexp that should match commit message",
+			EnvVars:     []string{"PLUGIN_TEMPLATE"},
+			Destination: &settings.CommitAllowRegexp,
+		},
+		&cli.StringFlag{
 			Name:        "fallback",
 			Usage:       "slack fallback",
 			EnvVars:     []string{"PLUGIN_FALLBACK"},
