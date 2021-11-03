@@ -1,10 +1,35 @@
 package main
 
 import (
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"gotest.tools/assert"
 )
+
+func TestExec(t *testing.T) {
+	plugin := Plugin{
+		Repo:   getTestRepo(),
+		Build:  getTestBuild(),
+		Job:    getTestJob(),
+		Config: getTestConfig(),
+	}
+
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		out, _ := ioutil.ReadAll(r.Body)
+		got := string(out)
+		want := `{"attachments":[{"color":"good","fallback":"Message Template Fallback:\nInitial commit\nmaster\nsuccess","text":"Message Template:\nInitial commit\n\nMessage body\nInitial commit\nMessage body","mrkdwn_in":["text","fallback"]}]}`
+		assert.Equal(t, got, want)
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	plugin.Config.Webhook = server.URL
+	plugin.Exec()
+}
 
 func TestNewCommitMessage(t *testing.T) {
 	testCases := map[string]struct {
@@ -132,6 +157,12 @@ func getTestBuild() Build {
 		Link:     "http://github.com/octocat/hello-world",
 		Started:  1546340400, // 2019-01-01 12:00:00
 		Created:  1546340400, // 2019-01-01 12:00:00
+	}
+}
+
+func getTestJob() Job {
+	return Job{
+		Started: 1546340400,
 	}
 }
 

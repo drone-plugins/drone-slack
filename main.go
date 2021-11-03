@@ -237,7 +237,9 @@ func run(c *cli.Context) error {
 			LinkNames: c.Bool("link-names"),
 		},
 	}
-
+	if plugin.Build.Commit == "" {
+		plugin.Build.Commit = "0000000000000000000000000000000000000000"
+	}
 	if plugin.Config.Webhook == "" {
 		return errors.New("Missing webhook")
 	}
