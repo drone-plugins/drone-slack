@@ -18,6 +18,7 @@ type (
 		Tag      string
 		Event    string
 		Number   int
+                Parent   int
 		Commit   string
 		Ref      string
 		Branch   string

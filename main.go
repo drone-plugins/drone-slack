@@ -146,6 +146,11 @@ func main() {
 			Usage:  "build number",
 			EnvVar: "DRONE_BUILD_NUMBER",
 		},
+                cli.IntFlag{
+                        Name:   "build.parent",
+                        Usage:  "build parent",
+                        EnvVar: "DRONE_BUILD_PARENT",
+                },
 		cli.StringFlag{
 			Name:   "build.status",
 			Usage:  "build status",
@@ -202,6 +207,7 @@ func run(c *cli.Context) error {
 		Build: Build{
 			Tag:    c.String("build.tag"),
 			Number: c.Int("build.number"),
+			Parent: c.Int("build.parent"),
 			Event:  c.String("build.event"),
 			Status: c.String("build.status"),
 			Commit: c.String("commit.sha"),
