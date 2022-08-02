@@ -1,5 +1,5 @@
 # escape=`
-FROM mcr.microsoft.com/windows/nanoserver:1803
+FROM mcr.microsoft.com/windows/nanoserver:2009
 USER ContainerAdministrator
 
 ENV GODEBUG=netdns=go
