@@ -18,7 +18,7 @@ type (
 		Tag      string
 		Event    string
 		Number   int
-                Parent   int
+		Parent   int
 		Commit   string
 		Ref      string
 		Branch   string
@@ -121,7 +121,7 @@ func (p Plugin) Exec() error {
 	} else if p.Config.Channel != "" {
 		payload.Channel = prepend("#", p.Config.Channel)
 	}
-	if p.Config.LinkNames == true {
+	if p.Config.LinkNames {
 		payload.LinkNames = "1"
 	}
 	if p.Config.Template != "" {

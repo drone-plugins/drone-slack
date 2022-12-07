@@ -146,11 +146,11 @@ func main() {
 			Usage:  "build number",
 			EnvVar: "DRONE_BUILD_NUMBER",
 		},
-                cli.IntFlag{
-                        Name:   "build.parent",
-                        Usage:  "build parent",
-                        EnvVar: "DRONE_BUILD_PARENT",
-                },
+		cli.IntFlag{
+			Name:   "build.parent",
+			Usage:  "build parent",
+			EnvVar: "DRONE_BUILD_PARENT",
+		},
 		cli.StringFlag{
 			Name:   "build.status",
 			Usage:  "build status",
@@ -190,7 +190,7 @@ func main() {
 	}
 
 	if _, err := os.Stat("/run/drone/env"); err == nil {
-		godotenv.Overload("/run/drone/env")
+		_ = godotenv.Overload("/run/drone/env")
 	}
 
 	if err := app.Run(os.Args); err != nil {

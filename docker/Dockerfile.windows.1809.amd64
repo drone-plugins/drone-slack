@@ -1,5 +1,5 @@
 # escape=`
-FROM mcr.microsoft.com/windows/nanoserver:1809
+FROM plugins/base:windows-1809-amd64@sha256:61095306fa56d51adc841f2b0f93f511efb5792d12f2549bb2eb1cbce02c1f05
 USER ContainerAdministrator
 
 ENV GODEBUG=netdns=go

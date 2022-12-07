@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -18,7 +18,7 @@ func TestExec(t *testing.T) {
 	}
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		out, _ := ioutil.ReadAll(r.Body)
+		out, _ := io.ReadAll(r.Body)
 		got := string(out)
 		want := `{"attachments":[{"color":"good","fallback":"Message Template Fallback:\nInitial commit\nmaster\nsuccess","text":"Message Template:\nInitial commit\n\nMessage body\nInitial commit\nMessage body","mrkdwn_in":["text","fallback"]}]}`
 		assert.Equal(t, got, want)
@@ -28,7 +28,7 @@ func TestExec(t *testing.T) {
 	defer server.Close()
 
 	plugin.Config.Webhook = server.URL
-	plugin.Exec()
+	_ = plugin.Exec()
 }
 
 func TestNewCommitMessage(t *testing.T) {
