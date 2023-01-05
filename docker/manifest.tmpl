@@ -22,10 +22,10 @@ manifests:
     platform:
       architecture: amd64
       os: windows
-      variant: 1809
+      version: 1809
   -
     image: plugins/slack:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}windows-ltsc2022-amd64
     platform:
       architecture: amd64
       os: windows
-      variant: ltsc2022
+      version: ltsc2022
