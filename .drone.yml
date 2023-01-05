@@ -1,380 +1,254 @@
----
 kind: pipeline
+type: vm
 name: testing
-
 platform:
   os: linux
   arch: amd64
+pool:
+  use: ubuntu
 
 steps:
-- name: vet
-  pull: always
-  image: golang:1.18
-  commands:
-  - go vet ./...
-  environment:
-    GO111MODULE: on
-
-- name: test
-  pull: always
-  image: golang:1.18
-  commands:
-  - go test -cover ./...
-  environment:
-    GO111MODULE: on
-
+  - name: lint
+    image: golang:1.19
+    pull: always
+    commands:
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - golangci-lint version
+      - golangci-lint run
+    volumes:
+      - name: gopath
+        path: "/go"
+  - name: test
+    image: golang:1.19
+    commands:
+      - go test -cover ./...
+    volumes:
+      - name: gopath
+        path: "/go"
+volumes:
+  - name: gopath
+    temp: {}
 trigger:
-  branch:
-  - master
+  ref:
+    - refs/heads/master
+    - refs/tags/**
+    - refs/pull/**
 
 ---
 kind: pipeline
+type: vm
 name: linux-amd64
-
 platform:
   os: linux
   arch: amd64
+pool:
+  use: ubuntu
 
 steps:
-- name: build-push
-  pull: always
-  image: golang:1.18
-  commands:
-  - "go build -v -ldflags \"-X main.build=${DRONE_BUILD_NUMBER}\" -a -o release/linux/amd64/drone-slack"
-  environment:
-    CGO_ENABLED: 0
-    GO111MODULE: on
-  when:
-    event:
-    - push
-    - pull_request
-
-- name: build-tag
-  pull: always
-  image: golang:1.18
-  commands:
-  - "go build -v -ldflags \"-X main.version=${DRONE_TAG##v} -X main.build=${DRONE_BUILD_NUMBER}\" -a -o release/linux/amd64/drone-slack"
-  environment:
-    CGO_ENABLED: 0
-    GO111MODULE: on
-  when:
-    event:
-    - tag
-
-- name: executable
-  pull: always
-  image: golang:1.18
-  commands:
-  - ./release/linux/amd64/drone-slack --help
-
-- name: dryrun
-  pull: always
-  image: plugins/docker:linux-amd64
-  settings:
-    dockerfile: docker/Dockerfile.linux.amd64
-    dry_run: true
-    password:
-      from_secret: docker_password
-    repo: plugins/slack
-    tags: linux-amd64
-    username:
-      from_secret: docker_username
-  when:
-    event:
-    - pull_request
-
-- name: publish
-  pull: always
-  image: plugins/docker:linux-amd64
-  settings:
-    auto_tag: true
-    auto_tag_suffix: linux-amd64
-    dockerfile: docker/Dockerfile.linux.amd64
-    password:
-      from_secret: docker_password
-    repo: plugins/slack
-    username:
-      from_secret: docker_username
-  when:
-    event:
-    - push
-    - tag
-
-trigger:
-  branch:
-  - master
-
+  - name: environment
+    image: golang:1.19
+    pull: always
+    environment:
+      CGO_ENABLED: "0"
+    commands:
+      - go version
+      - go env
+  - name: build
+    image: golang:1.19
+    environment:
+      CGO_ENABLED: "0"
+    commands:
+      - go build -v -ldflags "-X main.version=" -a -tags netgo -o release/linux/amd64/drone-slack .
+  - name: docker
+    image: plugins/docker
+    settings:
+      dockerfile: docker/Dockerfile.linux.amd64
+      repo: plugins/slack
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      auto_tag: true
+      auto_tag_suffix: linux-amd64
 depends_on:
-- testing
+  - testing
+trigger:
+  ref:
+    - refs/heads/master
+    - refs/tags/**
+    - refs/pull/**
 
 ---
 kind: pipeline
+type: docker
 name: linux-arm64
-
 platform:
   os: linux
   arch: arm64
+pool:
+  use: ubuntu_arm64
 
 steps:
-- name: build-push
-  pull: always
-  image: golang:1.18
-  commands:
-  - "go build -v -ldflags \"-X main.build=${DRONE_BUILD_NUMBER}\" -a -o release/linux/arm64/drone-slack"
-  environment:
-    CGO_ENABLED: 0
-    GO111MODULE: on
-  when:
-    event:
-    - push
-    - pull_request
-
-- name: build-tag
-  pull: always
-  image: golang:1.18
-  commands:
-  - "go build -v -ldflags \"-X main.version=${DRONE_TAG##v} -X main.build=${DRONE_BUILD_NUMBER}\" -a -o release/linux/arm64/drone-slack"
-  environment:
-    CGO_ENABLED: 0
-    GO111MODULE: on
-  when:
-    event:
-    - tag
-
-- name: executable
-  pull: always
-  image: golang:1.18
-  commands:
-  - ./release/linux/arm64/drone-slack --help
-
-- name: dryrun
-  pull: always
-  image: plugins/docker:linux-arm64
-  settings:
-    dockerfile: docker/Dockerfile.linux.arm64
-    dry_run: true
-    password:
-      from_secret: docker_password
-    repo: plugins/slack
-    tags: linux-arm64
-    username:
-      from_secret: docker_username
-  when:
-    event:
-    - pull_request
-
-- name: publish
-  pull: always
-  image: plugins/docker:linux-arm64
-  settings:
-    auto_tag: true
-    auto_tag_suffix: linux-arm64
-    dockerfile: docker/Dockerfile.linux.arm64
-    password:
-      from_secret: docker_password
-    repo: plugins/slack
-    username:
-      from_secret: docker_username
-  when:
-    event:
-    - push
-    - tag
-
-trigger:
-  branch:
-  - master
-
+  - name: environment
+    image: golang:1.19
+    pull: always
+    environment:
+      CGO_ENABLED: "0"
+    commands:
+      - go version
+      - go env
+  - name: build
+    image: golang:1.19
+    environment:
+      CGO_ENABLED: "0"
+    commands:
+      - go build -v -ldflags "-X main.version=" -a -tags netgo -o release/linux/arm64/drone-slack .
+  - name: docker
+    image: plugins/docker
+    settings:
+      dockerfile: docker/Dockerfile.linux.arm64
+      repo: plugins/slack
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      auto_tag: true
+      auto_tag_suffix: linux-arm64
 depends_on:
-- testing
+  - testing
+trigger:
+  ref:
+    - refs/heads/master
+    - refs/tags/**
+    - refs/pull/**
 
 ---
 kind: pipeline
-name: linux-arm
-
-platform:
-  os: linux
-  arch: arm
-
-steps:
-- name: build-push
-  pull: always
-  image: golang:1.18
-  commands:
-  - "go build -v -ldflags \"-X main.build=${DRONE_BUILD_NUMBER}\" -a -o release/linux/arm/drone-slack"
-  environment:
-    CGO_ENABLED: 0
-    GO111MODULE: on
-  when:
-    event:
-    - push
-    - pull_request
-
-- name: build-tag
-  pull: always
-  image: golang:1.18
-  commands:
-  - "go build -v -ldflags \"-X main.version=${DRONE_TAG##v} -X main.build=${DRONE_BUILD_NUMBER}\" -a -o release/linux/arm/drone-slack"
-  environment:
-    CGO_ENABLED: 0
-    GO111MODULE: on
-  when:
-    event:
-    - tag
-
-- name: executable
-  pull: always
-  image: golang:1.18
-  commands:
-  - ./release/linux/arm/drone-slack --help
-
-- name: dryrun
-  pull: always
-  image: plugins/docker:linux-arm
-  settings:
-    dockerfile: docker/Dockerfile.linux.arm
-    dry_run: true
-    password:
-      from_secret: docker_password
-    repo: plugins/slack
-    tags: linux-arm
-    username:
-      from_secret: docker_username
-  when:
-    event:
-    - pull_request
-
-- name: publish
-  pull: always
-  image: plugins/docker:linux-arm
-  settings:
-    auto_tag: true
-    auto_tag_suffix: linux-arm
-    dockerfile: docker/Dockerfile.linux.arm
-    password:
-      from_secret: docker_password
-    repo: plugins/slack
-    username:
-      from_secret: docker_username
-  when:
-    event:
-    - push
-    - tag
-
-trigger:
-  branch:
-  - master
-
-depends_on:
-- testing
-
----
-kind: pipeline
-type: ssh
-name: windows-1809-amd64
-
+type: vm
+name: windows-1809
 platform:
   os: windows
-
-server:
-  host: windows.1809.amd64.plugins.drone.ci
-  password:
-    from_secret: windows_password
-  user:
-    from_secret: windows_username
+  arch: amd64
+pool:
+  use: windows
 
 steps:
-- name: build
-  commands:
-  # TODO use the new DRONE_SEMVER_SHORT environment variables to
-  # publish docker images for tag events.
-  - go build -o release/windows/amd64/drone-slack.exe
-  - docker login -u $env:USERNAME -p $env:PASSWORD
-  - docker build -f docker/Dockerfile.windows.1809.amd64 -t plugins/slack:windows-1809-amd64 .
-  - docker push plugins/slack:windows-1809-amd64
-  environment:
-    CGO_ENABLED: "0"
-    USERNAME:
-      from_secret: docker_username
-    PASSWORD:
-      from_secret: docker_password
-
-trigger:
-  event:
-  - push
-
+  - name: environment
+    image: golang:1.19
+    pull: always
+    environment:
+      CGO_ENABLED: "0"
+    commands:
+      - go version
+      - go env
+  - name: build
+    image: golang:1.19
+    environment:
+      CGO_ENABLED: "0"
+    commands:
+      - go build -v -ldflags "-X main.version=" -a -tags netgo -o release/windows/amd64/drone-slack.exe .
+  - name: docker
+    image: plugins/docker
+    settings:
+      dockerfile: docker/Dockerfile.windows.1809
+      repo: plugins/slack
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      auto_tag: true
+      auto_tag_suffix: windows-1809-amd64
+      daemon_off: true
+      purge: false
+    when:
+      ref:
+        - refs/heads/master
+        - refs/tags/**
 depends_on:
-- testing
+  - testing
+trigger:
+  ref:
+    - refs/heads/master
+    - refs/tags/**
+    - refs/pull/**
 
 ---
 kind: pipeline
-type: ssh
-name: windows-1903-amd64
-
+type: vm
+name: windows-ltsc2022
 platform:
   os: windows
-
-server:
-  host: windows.1903.amd64.plugins.drone.ci
-  password:
-    from_secret: windows_password
-  user:
-    from_secret: windows_username
+  arch: amd64
+pool:
+  use: windows-2022
 
 steps:
-- name: build
-  commands:
-  # TODO use the new DRONE_SEMVER_SHORT environment variables to
-  # publish docker images for tag events.
-  - go build -o release/windows/amd64/drone-slack.exe
-  - docker login -u $env:USERNAME -p $env:PASSWORD
-  - docker build -f docker/Dockerfile.windows.1903.amd64 -t plugins/slack:windows-1903-amd64 .
-  - docker push plugins/slack:windows-1903-amd64
-  environment:
-    CGO_ENABLED: "0"
-    USERNAME:
-      from_secret: docker_username
-    PASSWORD:
-      from_secret: docker_password
-
-trigger:
-  event:
-  - push
-
+  - name: environment
+    image: golang:1.19
+    pull: always
+    environment:
+      CGO_ENABLED: "0"
+    commands:
+      - go version
+      - go env
+  - name: build
+    image: golang:1.19
+    environment:
+      CGO_ENABLED: "0"
+    commands:
+      - go build -v -ldflags "-X main.version=" -a -tags netgo -o release/windows/amd64/drone-slack.exe .
+  - name: docker
+    image: plugins/docker
+    settings:
+      dockerfile: docker/Dockerfile.windows.ltsc2022
+      repo: plugins/slack
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      auto_tag: true
+      auto_tag_suffix: windows-ltsc2022-amd64
+      daemon_off: true
+      purge: false
+    when:
+      ref:
+        - refs/heads/master
+        - refs/tags/**
 depends_on:
-- testing
+  - testing
+trigger:
+  ref:
+    - refs/heads/master
+    - refs/tags/**
+    - refs/pull/**
 
 ---
 kind: pipeline
-name: notifications
-
+type: vm
+name: manifest
 platform:
   os: linux
   arch: amd64
+pool:
+  use: ubuntu
 
 steps:
-- name: manifest
-  pull: always
-  image: plugins/manifest:1
-  settings:
-    ignore_missing: true
-    password:
-      from_secret: docker_password
-    spec: docker/manifest.tmpl
-    username:
-      from_secret: docker_username
-
-trigger:
-  branch:
-  - master
-  event:
-  - push
-  - tag
-
+  - name: manifest
+    image: plugins/manifest
+    settings:
+      auto_tag: "true"
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      spec: docker/manifest.tmpl
+      ignore_missing: true
 depends_on:
-- windows-1809-amd64
-- windows-1903-amd64
-- linux-amd64
-- linux-arm64
-- linux-arm
-
-...
+  - linux-amd64
+  - linux-arm64
+  - windows-1809
+  - windows-ltsc2022
+trigger:
+  ref:
+    - refs/heads/master
+    - refs/tags/**

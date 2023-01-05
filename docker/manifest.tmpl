@@ -18,26 +18,14 @@ manifests:
       os: linux
       variant: v8
   -
-    image: plugins/slack:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}linux-arm
-    platform:
-      architecture: arm
-      os: linux
-      variant: v7
-  -
-    image: plugins/slack:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}windows-1803-amd64
-    platform:
-      architecture: amd64
-      os: windows
-      variant: 1803
-  -
     image: plugins/slack:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}windows-1809-amd64
     platform:
       architecture: amd64
       os: windows
       variant: 1809
   -
-    image: plugins/slack:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}windows-1903-amd64
+    image: plugins/slack:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}windows-ltsc2022-amd64
     platform:
       architecture: amd64
       os: windows
-      variant: 1903
+      variant: ltsc2022
