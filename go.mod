@@ -6,7 +6,7 @@ require (
 	github.com/bluele/slack v0.0.0-20180528010058-b4b4d354a079
 	github.com/drone/drone-template-lib v1.0.1-0.20201006172840-a58a3f26ebca
 	github.com/joho/godotenv v1.4.0
-	github.com/urfave/cli v1.22.10
+	github.com/urfave/cli v1.22.12
 	gotest.tools v2.2.0+incompatible
 )
 
