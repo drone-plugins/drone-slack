@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bluele/slack"
 	"github.com/drone/drone-template-lib/template"
+	"github.com/slack-go/slack"
 )
 
 type (
@@ -87,6 +87,7 @@ func newCommitMessage(m string) Message {
 		Body:  strings.TrimSpace(strings.Join(splitMsg[1:], "\n")),
 	}
 }
+
 func (m Message) String() string {
 	return m.msg
 }
@@ -95,6 +96,7 @@ func (p Plugin) Exec() error {
 	attachment := slack.Attachment{
 		Color:      p.Config.Color,
 		ImageURL:   p.Config.ImageURL,
+		AuthorName: "drone-slack",
 		MarkdownIn: []string{"text", "fallback"},
 	}
 	if p.Config.Color == "" {
@@ -110,32 +112,31 @@ func (p Plugin) Exec() error {
 		attachment.Fallback = fallback(p.Repo, p.Build)
 	}
 
-	payload := slack.WebHookPostPayload{}
-	payload.Username = p.Config.Username
-	payload.Attachments = []*slack.Attachment{&attachment}
-	payload.IconUrl = p.Config.IconURL
-	payload.IconEmoji = p.Config.IconEmoji
+	if p.Config.Template != "" {
+		var err error
+		f, err := templateMessage(p.Config.Template, p)
+		if err != nil {
+			return err
+		}
+		attachment.Text = f
+	} else {
+		attachment.Text = message(p.Repo, p.Build)
+	}
+
+	payload := slack.WebhookMessage{
+		Username:    p.Config.Username,
+		Attachments: []slack.Attachment{attachment},
+		IconURL:     p.Config.IconURL,
+		IconEmoji:   p.Config.IconEmoji,
+	}
 
 	if p.Config.Recipient != "" {
 		payload.Channel = prepend("@", p.Config.Recipient)
 	} else if p.Config.Channel != "" {
 		payload.Channel = prepend("#", p.Config.Channel)
 	}
-	if p.Config.LinkNames {
-		payload.LinkNames = "1"
-	}
-	if p.Config.Template != "" {
-		var err error
-		attachment.Text, err = templateMessage(p.Config.Template, p)
-		if err != nil {
-			return err
-		}
-	} else {
-		attachment.Text = message(p.Repo, p.Build)
-	}
 
-	client := slack.NewWebHook(p.Config.Webhook)
-	return client.PostMessage(&payload)
+	return slack.PostWebhook(p.Config.Webhook, &payload)
 }
 
 func templateMessage(t string, plugin Plugin) (string, error) {
