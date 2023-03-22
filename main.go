@@ -33,9 +33,9 @@ func main() {
 			EnvVar: "PLUGIN_CHANNEL",
 		},
 		cli.StringFlag{
-			Name:   "recipient",
-			Usage:  "slack recipient",
-			EnvVar: "PLUGIN_RECIPIENT",
+			Name:   "mapping",
+			Usage:  "slack user mapping",
+			EnvVar: "PLUGIN_MAPPING",
 		},
 		cli.StringFlag{
 			Name:   "username",
@@ -232,7 +232,7 @@ func run(c *cli.Context) error {
 		Config: Config{
 			Webhook:   c.String("webhook"),
 			Channel:   c.String("channel"),
-			Recipient: c.String("recipient"),
+			Mapping:   c.String("mapping"),
 			Username:  c.String("username"),
 			Template:  c.String("template"),
 			Fallback:  c.String("fallback"),

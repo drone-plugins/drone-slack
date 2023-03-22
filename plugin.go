@@ -1,7 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
 	"strings"
 
 	"github.com/drone/drone-template-lib/template"
@@ -48,7 +53,7 @@ type (
 	Config struct {
 		Webhook   string
 		Channel   string
-		Recipient string
+		Mapping   string
 		Username  string
 		Template  string
 		Fallback  string
@@ -130,13 +135,57 @@ func (p Plugin) Exec() error {
 		IconEmoji:   p.Config.IconEmoji,
 	}
 
-	if p.Config.Recipient != "" {
-		payload.Channel = prepend("@", p.Config.Recipient)
+	if p.Config.Mapping != "" {
+		mapping, err := userMapping(p.Config.Mapping)
+		if err != nil {
+			return err
+		}
+
+		memberId, ok := mapping[p.Build.Author.Username]
+		if !ok {
+			return fmt.Errorf("user not found in mapping: %s", p.Build.Author.Username)
+		}
+
+		payload.Channel = memberId
 	} else if p.Config.Channel != "" {
 		payload.Channel = prepend("#", p.Config.Channel)
 	}
 
 	return slack.PostWebhook(p.Config.Webhook, &payload)
+}
+
+// userMapping gets the user mapping file.
+func userMapping(value string) (map[string]string, error) {
+	mapping := []byte(contents(value))
+
+	// turn into a map
+	values := map[string]string{}
+	err := json.Unmarshal(mapping, &values)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return values, nil
+}
+
+// contents gets the value referenced either in a local filem, a URL or the
+// string value itself.
+func contents(s string) string {
+	if _, err := os.Stat(s); err == nil {
+		o, _ := os.ReadFile(s)
+		return os.ExpandEnv(string(o))
+	}
+	if _, err := url.Parse(s); err == nil {
+		resp, err := http.Get(s)
+		if err != nil {
+			return s
+		}
+		defer resp.Body.Close()
+		o, _ := io.ReadAll(resp.Body)
+		return os.ExpandEnv(string(o))
+	}
+	return os.ExpandEnv(s)
 }
 
 func templateMessage(t string, plugin Plugin) (string, error) {
