@@ -20,7 +20,7 @@ func TestExec(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		out, _ := io.ReadAll(r.Body)
 		got := string(out)
-		want := `{"attachments":[{"color":"good","fallback":"Message Template Fallback:\nInitial commit\nmaster\nsuccess","author_name":"drone-slack","text":"Message Template:\nInitial commit\n\nMessage body\nInitial commit\nMessage body","mrkdwn_in":["text","fallback"],"blocks":null}],"replace_original":false,"delete_original":false}`
+		want := `{"attachments":[{"color":"good","fallback":"Message Template Fallback:\nInitial commit\nmaster\nsuccess","text":"Message Template:\nInitial commit\n\nMessage body\nInitial commit\nMessage body","mrkdwn_in":["text","fallback"],"blocks":null}],"replace_original":false,"delete_original":false}`
 		assert.Equal(t, got, want)
 	}
 
