@@ -139,7 +139,12 @@ func (p Plugin) Exec() error {
 }
 
 func templateMessage(t string, plugin Plugin) (string, error) {
-	return template.RenderTrim(t, plugin)
+	c, err := contents(t)
+	if err != nil {
+		return "", fmt.Errorf("could not read template: %w", err)
+	}
+
+	return template.RenderTrim(c, plugin)
 }
 
 func message(repo Repo, build Build) string {
