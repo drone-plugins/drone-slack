@@ -96,7 +96,6 @@ func (p Plugin) Exec() error {
 	attachment := slack.Attachment{
 		Color:      p.Config.Color,
 		ImageURL:   p.Config.ImageURL,
-		AuthorName: "drone-slack",
 		MarkdownIn: []string{"text", "fallback"},
 	}
 	if p.Config.Color == "" {
