@@ -80,7 +80,7 @@ trigger:
 
 ---
 kind: pipeline
-type: docker
+type: vm
 name: linux-arm64
 platform:
   os: linux
