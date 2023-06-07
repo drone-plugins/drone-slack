@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -12,6 +13,10 @@ type (
 	Repo struct {
 		Owner string
 		Name  string
+	}
+
+	BlockSet struct {
+		Blocks []json.RawMessage `json:"blocks"`
 	}
 
 	Build struct {
@@ -46,17 +51,19 @@ type (
 	}
 
 	Config struct {
-		Webhook   string
-		Channel   string
-		Recipient string
-		Username  string
-		Template  string
-		Fallback  string
-		ImageURL  string
-		IconURL   string
-		IconEmoji string
-		Color     string
-		LinkNames bool
+		Webhook     string
+		Channel     string
+		Recipient   string
+		Username    string
+		Template    string
+		Fallback    string
+		ImageURL    string
+		IconURL     string
+		IconEmoji   string
+		Color       string
+		LinkNames   bool
+		CustomBlock string
+		AccessToken string
 	}
 
 	Job struct {
@@ -93,48 +100,111 @@ func (m Message) String() string {
 }
 
 func (p Plugin) Exec() error {
-	attachment := slack.Attachment{
-		Color:      p.Config.Color,
-		ImageURL:   p.Config.ImageURL,
-		MarkdownIn: []string{"text", "fallback"},
-	}
-	if p.Config.Color == "" {
-		attachment.Color = color(p.Build)
-	}
-	if p.Config.Fallback != "" {
-		f, err := templateMessage(p.Config.Fallback, p)
-		if err != nil {
-			return err
-		}
-		attachment.Fallback = f
-	} else {
-		attachment.Fallback = fallback(p.Repo, p.Build)
+	var blocks []slack.Block
+	var channel string
+	var text string
+	var fallbackText string
+
+	// Determine the channel
+	if p.Config.Recipient != "" {
+		channel = prepend("@", p.Config.Recipient)
+	} else if p.Config.Channel != "" {
+		channel = prepend("#", p.Config.Channel)
 	}
 
+	// Determine the message and fallback
 	if p.Config.Template != "" {
 		var err error
-		f, err := templateMessage(p.Config.Template, p)
+		text, err = templateMessage(p.Config.Template, p)
 		if err != nil {
 			return err
 		}
-		attachment.Text = f
 	} else {
-		attachment.Text = message(p.Repo, p.Build)
+		text = message(p.Repo, p.Build)
 	}
 
+	if p.Config.Fallback != "" {
+		var err error
+		fallbackText, err = templateMessage(p.Config.Fallback, p)
+		if err != nil {
+			return err
+		}
+	} else {
+		fallbackText = fallback(p.Repo, p.Build)
+	}
+
+	// Determine the color
+	colorText := p.Config.Color
+	if colorText == "" {
+		colorText = color(p.Build)
+	}
+
+	// Parse custom blocks if they exist
+	if p.Config.CustomBlock != "" {
+		var blockSet BlockSet
+		err := json.Unmarshal([]byte(p.Config.CustomBlock), &blockSet)
+		if err != nil {
+			return fmt.Errorf("could not unmarshal custom block: %w", err)
+		}
+		for _, rawMessage := range blockSet.Blocks {
+			block := new(slack.SectionBlock)
+			err := json.Unmarshal(rawMessage, block)
+			if err != nil {
+				return fmt.Errorf("could not unmarshal individual block: %w", err)
+			}
+			blocks = append(blocks, block)
+		}
+	}
+
+	// If access token is provided, use it
+	if p.Config.AccessToken != "" {
+		slackApi := slack.New(p.Config.AccessToken)
+		_, err := slackApi.AuthTest()
+		if err != nil {
+			return fmt.Errorf("failed to authenticate using access token: %w", err)
+		}
+
+		options := []slack.MsgOption{}
+		if text != "" {
+			options = append(options, slack.MsgOptionText(text, false))
+		}
+		if len(blocks) > 0 {
+			options = append(options, slack.MsgOptionBlocks(blocks...))
+		}
+
+		_, _, err = slackApi.PostMessage(channel, options...)
+		if err != nil {
+			return fmt.Errorf("failed to post message using access token: %w", err)
+		}
+		return nil
+	}
+
+	// Build the attachment
+	attachment := slack.Attachment{
+		Color:      colorText,
+		ImageURL:   p.Config.ImageURL,
+		MarkdownIn: []string{"text", "fallback"},
+		Text:       text,
+		Fallback:   fallbackText,
+	}
+
+	// Build the payload
 	payload := slack.WebhookMessage{
 		Username:    p.Config.Username,
 		Attachments: []slack.Attachment{attachment},
 		IconURL:     p.Config.IconURL,
 		IconEmoji:   p.Config.IconEmoji,
+		Channel:     channel,
 	}
 
-	if p.Config.Recipient != "" {
-		payload.Channel = prepend("@", p.Config.Recipient)
-	} else if p.Config.Channel != "" {
-		payload.Channel = prepend("#", p.Config.Channel)
+	// Add custom blocks to the payload if they exist
+	if len(blocks) > 0 {
+		payload.Blocks = &slack.Blocks{
+			BlockSet: blocks,
+		}
 	}
 
+	// Post the message with the webhook
 	return slack.PostWebhook(p.Config.Webhook, &payload)
 }
 

@@ -187,6 +187,16 @@ func main() {
 			Usage:  "job started",
 			EnvVar: "DRONE_JOB_STARTED",
 		},
+		cli.StringFlag{
+			Name:   "customBlock",
+			Usage:  "custom block to send to slack. ",
+			EnvVar: "PLUGIN_CUSTOM_BLOCK",
+		},
+		cli.StringFlag{
+			Name:   "accessToken",
+			Usage:  "slack access token",
+			EnvVar: "SLACK_ACCESS_TOKEN",
+		},
 	}
 
 	if _, err := os.Stat("/run/drone/env"); err == nil {
@@ -230,17 +240,19 @@ func run(c *cli.Context) error {
 			Started: c.Int64("job.started"),
 		},
 		Config: Config{
-			Webhook:   c.String("webhook"),
-			Channel:   c.String("channel"),
-			Recipient: c.String("recipient"),
-			Username:  c.String("username"),
-			Template:  c.String("template"),
-			Fallback:  c.String("fallback"),
-			ImageURL:  c.String("image"),
-			IconURL:   c.String("icon.url"),
-			IconEmoji: c.String("icon.emoji"),
-			Color:     c.String("color"),
-			LinkNames: c.Bool("link-names"),
+			Webhook:     c.String("webhook"),
+			Channel:     c.String("channel"),
+			Recipient:   c.String("recipient"),
+			Username:    c.String("username"),
+			Template:    c.String("template"),
+			Fallback:    c.String("fallback"),
+			ImageURL:    c.String("image"),
+			IconURL:     c.String("icon.url"),
+			IconEmoji:   c.String("icon.emoji"),
+			Color:       c.String("color"),
+			LinkNames:   c.Bool("link-names"),
+			CustomBlock: c.String("customBlock"),
+			AccessToken: c.String("accessToken"),
 		},
 	}
 	if plugin.Build.Commit == "" {
