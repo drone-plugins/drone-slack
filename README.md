@@ -50,6 +50,16 @@ docker run --rm \
   plugins/slack
 ```
 
+
+Please note the following new environment variables:
+
+- `SLACK_ACCESS_TOKEN`: The access token for Slack API authentication.
+- `PLUGIN_CUSTOM_BLOCK`: Custom blocks in JSON format to include in the Slack message.
+
+Make sure to replace `your_access_token` with your actual Slack access token and adjust
+
+If you provide an access token, it will use the Slack API to send the message. Otherwise, it will use the webhook.
+
 ## Release Preparation
 
 Run the changelog generator.
