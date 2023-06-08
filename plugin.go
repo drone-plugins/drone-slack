@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"strings"
+	textTemplate "text/template"
 
 	"github.com/drone/drone-template-lib/template"
 	"github.com/slack-go/slack"
@@ -51,19 +54,21 @@ type (
 	}
 
 	Config struct {
-		Webhook     string
-		Channel     string
-		Recipient   string
-		Username    string
-		Template    string
-		Fallback    string
-		ImageURL    string
-		IconURL     string
-		IconEmoji   string
-		Color       string
-		LinkNames   bool
-		CustomBlock string
-		AccessToken string
+		Webhook        string
+		Channel        string
+		Recipient      string
+		Username       string
+		Template       string
+		Fallback       string
+		ImageURL       string
+		IconURL        string
+		IconEmoji      string
+		Color          string
+		LinkNames      bool
+		CustomBlock    string
+		AccessToken    string
+		Mentions       string
+		CustomTemplate string
 	}
 
 	Job struct {
@@ -123,6 +128,92 @@ func (p Plugin) Exec() error {
 		text = message(p.Repo, p.Build)
 	}
 
+	// Add mentions to the message
+	if p.Config.Mentions != "" {
+		var mentionUserIDs = strings.Split(p.Config.Mentions, ",")
+		mentions := make([]string, len(mentionUserIDs))
+		for i, id := range mentionUserIDs {
+			// Check if the id starts with "@" and format it accordingly
+			if strings.HasPrefix(id, "@") {
+				mentions[i] = fmt.Sprintf("<%s>:", id)
+			} else {
+				mentions[i] = fmt.Sprintf("<@%s>:", id)
+			}
+		}
+		mentionText := strings.Join(mentions, " ")
+		text = fmt.Sprintf("%s %s", mentionText, text)
+	}
+
+	if p.Config.CustomTemplate != "" {
+		// Read JSON from file
+		var filePath string
+
+		switch p.Config.CustomTemplate {
+		case "success_tagged_deploy_1":
+			filePath = "templates/success_tag_deploy.json"
+		default:
+			return fmt.Errorf("invalid template name: %s", p.Config.CustomTemplate)
+		}
+
+		// Read JSON from file
+		file, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to read template file: %w", err)
+		}
+
+		// Fill in the missing values in the template
+		tmpl, err := textTemplate.New("template").Parse(string(file))
+		if err != nil {
+			return fmt.Errorf("failed to parse template: %w", err)
+		}
+
+		var filledTemplate bytes.Buffer
+		err = tmpl.Execute(&filledTemplate, p)
+		if err != nil {
+			return fmt.Errorf("failed to fill in template values: %w", err)
+		}
+
+		// Parse the filled template JSON into a BlockSet
+		var blockSet BlockSet
+		err = json.Unmarshal(filledTemplate.Bytes(), &blockSet)
+		if err != nil {
+			return fmt.Errorf("failed to parse filled template JSON: %w", err)
+		}
+
+		// Parse each block into a slack.Block and append to blocks
+		for _, rawBlock := range blockSet.Blocks {
+			var blockType struct {
+				Type string `json:"type"`
+			}
+			err := json.Unmarshal(rawBlock, &blockType)
+			if err != nil {
+				return fmt.Errorf("failed to parse block type JSON: %w", err)
+			}
+
+			var block slack.Block
+			switch blockType.Type {
+			case "section":
+				block = new(slack.SectionBlock)
+			case "divider":
+				block = new(slack.DividerBlock)
+			case "header":
+				block = new(slack.HeaderBlock)
+			case "actions":
+				block = new(slack.ActionBlock)
+			default:
+				return fmt.Errorf("unknown block type: %s", blockType.Type)
+			}
+
+			err = json.Unmarshal(rawBlock, block)
+			if err != nil {
+				return fmt.Errorf("failed to parse block JSON: %w", err)
+			}
+
+			blocks = append(blocks, block)
+		}
+		text = ""
+	}
+
 	if p.Config.Fallback != "" {
 		var err error
 		fallbackText, err = templateMessage(p.Config.Fallback, p)
@@ -167,8 +258,7 @@ func (p Plugin) Exec() error {
 		options := []slack.MsgOption{}
 		if text != "" {
 			options = append(options, slack.MsgOptionText(text, false))
-		}
-		if len(blocks) > 0 {
+		} else if len(blocks) > 0 {
 			options = append(options, slack.MsgOptionBlocks(blocks...))
 		}
 

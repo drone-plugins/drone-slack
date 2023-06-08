@@ -17,6 +17,7 @@ var (
 
 func main() {
 	app := cli.NewApp()
+	godotenv.Load(".env")
 	app.Name = "slack plugin"
 	app.Usage = "slack plugin"
 	app.Action = run
@@ -197,6 +198,16 @@ func main() {
 			Usage:  "slack access token",
 			EnvVar: "SLACK_ACCESS_TOKEN",
 		},
+		cli.StringFlag{
+			Name:   "mentions",
+			Usage:  "slack mentions for the message.",
+			EnvVar: "PLUGIN_MENTIONS",
+		},
+		cli.StringFlag{
+			Name:   "customTemplate",
+			Usage:  "prebuilt custom template for the message.",
+			EnvVar: "PLUGIN_CUSTOM_TEMPLATE",
+		},
 	}
 
 	if _, err := os.Stat("/run/drone/env"); err == nil {
@@ -240,26 +251,28 @@ func run(c *cli.Context) error {
 			Started: c.Int64("job.started"),
 		},
 		Config: Config{
-			Webhook:     c.String("webhook"),
-			Channel:     c.String("channel"),
-			Recipient:   c.String("recipient"),
-			Username:    c.String("username"),
-			Template:    c.String("template"),
-			Fallback:    c.String("fallback"),
-			ImageURL:    c.String("image"),
-			IconURL:     c.String("icon.url"),
-			IconEmoji:   c.String("icon.emoji"),
-			Color:       c.String("color"),
-			LinkNames:   c.Bool("link-names"),
-			CustomBlock: c.String("customBlock"),
-			AccessToken: c.String("accessToken"),
+			Webhook:        c.String("webhook"),
+			Channel:        c.String("channel"),
+			Recipient:      c.String("recipient"),
+			Username:       c.String("username"),
+			Template:       c.String("template"),
+			Fallback:       c.String("fallback"),
+			ImageURL:       c.String("image"),
+			IconURL:        c.String("icon.url"),
+			IconEmoji:      c.String("icon.emoji"),
+			Color:          c.String("color"),
+			LinkNames:      c.Bool("link-names"),
+			CustomBlock:    c.String("customBlock"),
+			AccessToken:    c.String("accessToken"),
+			Mentions:       c.String("mentions"),
+			CustomTemplate: c.String("customTemplate"),
 		},
 	}
 	if plugin.Build.Commit == "" {
 		plugin.Build.Commit = "0000000000000000000000000000000000000000"
 	}
-	if plugin.Config.Webhook == "" {
-		return errors.New("Missing webhook")
+	if plugin.Config.Webhook == "" && plugin.Config.AccessToken == "" {
+		return errors.New("webhook or access token required")
 	}
 
 	return plugin.Exec()
