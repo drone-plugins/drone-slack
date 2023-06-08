@@ -58,6 +58,7 @@ Please note the following new environment variables:
 
 Make sure to replace `your_access_token` with your actual Slack access token and adjust
 
+If you provide an access token, it will use the Slack API to send the message. Otherwise, it will use the webhook.
 
 ## Release Preparation
 
