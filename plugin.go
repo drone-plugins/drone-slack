@@ -149,8 +149,14 @@ func (p Plugin) Exec() error {
 		var filePath string
 
 		switch p.Config.CustomTemplate {
+		case "basic_success_1":
+			filePath = "templates/basic_success.json"
+		case "basic_fail_1":
+			filePath = "templates/basic_fail.json"
 		case "success_tagged_deploy_1":
 			filePath = "templates/success_tag_deploy.json"
+		case "basic_on_hold_1":
+			filePath = "templates/basic_on_hold.json"
 		default:
 			return fmt.Errorf("invalid template name: %s", p.Config.CustomTemplate)
 		}

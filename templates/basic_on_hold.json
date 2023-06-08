@@ -1,11 +1,10 @@
 {
-  "text": "CircleCI job succeeded!",
   "blocks": [
     {
       "type": "header",
       "text": {
         "type": "plain_text",
-        "text": "Deployment Successful! :tada:",
+        "text": "ON HOLD - Awaiting Approval :raised_hand:",
         "emoji": true
       }
     },
@@ -18,11 +17,11 @@
         },
         {
           "type": "mrkdwn",
-          "text": "*When*: {{.Build.Started}}"
+          "text": "*Branch*: {{.Build.Branch}}"
         },
         {
           "type": "mrkdwn",
-          "text": "*Tag*: {{.Build.Tag}}"
+          "text": "*Author*: {{.Build.Author.Username}}"
         }
       ]
     },
@@ -32,20 +31,6 @@
         {
           "type": "mrkdwn",
           "text": "*Mentions*: {{.Config.Mentions}}"
-        }
-      ]
-    },
-    {
-      "type": "actions",
-      "elements": [
-        {
-          "type": "button",
-          "action_id": "success_tagged_deploy_view",
-          "text": {
-            "type": "plain_text",
-            "text": "View Job"
-          },
-          "url": "{{.Build.Link}}"
         }
       ]
     }
