@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	textTemplate "text/template"
 
@@ -162,7 +162,7 @@ func (p Plugin) Exec() error {
 		}
 
 		// Read JSON from file
-		file, err := ioutil.ReadFile(filePath)
+		file, err := os.ReadFile(filePath)
 		if err != nil {
 			return fmt.Errorf("failed to read template file: %w", err)
 		}
