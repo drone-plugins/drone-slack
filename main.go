@@ -17,7 +17,6 @@ var (
 
 func main() {
 	app := cli.NewApp()
-	godotenv.Load(".env")
 	app.Name = "slack plugin"
 	app.Usage = "slack plugin"
 	app.Action = run
