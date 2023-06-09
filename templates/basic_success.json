@@ -1,0 +1,43 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Build Succeeded. :white_check_mark:",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Project*: {{.Repo.Name}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Branch*: {{.Build.Branch}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Author*: {{.Build.Author.Username}}"
+        }
+      ]
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "action_id": "view_build",
+          "text": {
+            "type": "plain_text",
+            "text": "View Build"
+          },
+          "url": "{{.Build.Link}}"
+        }
+      ]
+    }
+  ]
+}

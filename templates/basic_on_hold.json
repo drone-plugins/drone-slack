@@ -1,0 +1,38 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "ON HOLD - Awaiting Approval :raised_hand:",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Project*: {{.Repo.Name}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Branch*: {{.Build.Branch}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Author*: {{.Build.Author.Username}}"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Mentions*: {{.Config.Mentions}}"
+        }
+      ]
+    }
+  ]
+}

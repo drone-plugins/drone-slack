@@ -1,0 +1,53 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Deployment Successful! :tada:",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Project*: {{.Repo.Name}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*When*: {{.Build.Started}}"
+          "text": "*When*: {{.Build.Started}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Tag*: {{.Build.Tag}}"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Mentions*: {{.Config.Mentions}}"
+        }
+      ]
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "action_id": "success_tagged_deploy_view",
+          "text": {
+            "type": "plain_text",
+            "text": "View Job"
+          },
+          "url": "{{.Build.Link}}"
+        }
+      ]
+    }
+  ]
+}
