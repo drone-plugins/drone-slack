@@ -271,7 +271,7 @@ func run(c *cli.Context) error {
 		plugin.Build.Commit = "0000000000000000000000000000000000000000"
 	}
 	if plugin.Config.Webhook == "" && plugin.Config.AccessToken == "" {
-		return errors.New("webhook or access token required")
+		return errors.New("you must provide a webhook url or access token")
 	}
 
 	return plugin.Exec()

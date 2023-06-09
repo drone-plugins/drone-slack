@@ -262,10 +262,10 @@ func (p Plugin) Exec() error {
 		}
 
 		options := []slack.MsgOption{}
-		if text != "" {
-			options = append(options, slack.MsgOptionText(text, false))
-		} else if len(blocks) > 0 {
+		if len(blocks) > 0 {
 			options = append(options, slack.MsgOptionBlocks(blocks...))
+		} else {
+			options = append(options, slack.MsgOptionText(text, false))
 		}
 
 		_, _, err = slackApi.PostMessage(channel, options...)
