@@ -17,6 +17,7 @@ var (
 
 func main() {
 	app := cli.NewApp()
+	godotenv.Load(".env")
 	app.Name = "slack plugin"
 	app.Usage = "slack plugin"
 	app.Action = run
@@ -207,6 +208,11 @@ func main() {
 			Usage:  "prebuilt custom template for the message.",
 			EnvVar: "PLUGIN_CUSTOM_TEMPLATE",
 		},
+		cli.StringFlag{
+			Name:   "message",
+			Usage:  "slack message. either this or the custom template must be set. ",
+			EnvVar: "PLUGIN_MESSAGE",
+		},
 	}
 
 	if _, err := os.Stat("/run/drone/env"); err == nil {
@@ -265,6 +271,7 @@ func run(c *cli.Context) error {
 			AccessToken:    c.String("accessToken"),
 			Mentions:       c.String("mentions"),
 			CustomTemplate: c.String("customTemplate"),
+			Message:        c.String("message"),
 		},
 	}
 	if plugin.Build.Commit == "" {

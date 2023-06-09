@@ -69,6 +69,7 @@ type (
 		AccessToken    string
 		Mentions       string
 		CustomTemplate string
+		Message        string
 	}
 
 	Job struct {
@@ -124,6 +125,8 @@ func (p Plugin) Exec() error {
 		if err != nil {
 			return err
 		}
+	} else if p.Config.Message != "" {
+		text = p.Config.Message
 	} else {
 		text = message(p.Repo, p.Build)
 	}
