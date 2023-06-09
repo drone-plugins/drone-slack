@@ -1,10 +1,23 @@
 {
   "extends": [
-    "config:base"
+    "config:base",
+    ":automergeMinor",
+    ":automergeDigest"
   ],
-  "docker": {
+  "enabledManagers": [
+    "dockerfile",
+    "gomod"
+  ],
+  "dockerfile": {
     "fileMatch": [
-      "/docker/Dockerfile"
+      "docker/Dockerfile\\.linux\\.(arm|arm64|amd64|multiarch)",
+      "docker/Dockerfile\\.windows\\.(1809|ltsc2022)"
+    ],
+    "pinDigests": true
+  },
+  "gomod": {
+    "postUpdateOptions": [
+      "gomodTidy"
     ]
   },
   "labels": [
