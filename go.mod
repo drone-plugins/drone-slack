@@ -6,7 +6,7 @@ require (
 	github.com/drone/drone-template-lib v1.0.0
 	github.com/joho/godotenv v1.5.1
 	github.com/slack-go/slack v0.12.2
-	github.com/urfave/cli v1.22.13
+	github.com/urfave/cli v1.22.14
 	gotest.tools/v3 v3.4.0
 )
 
