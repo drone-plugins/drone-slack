@@ -188,14 +188,14 @@ func main() {
 			EnvVar: "DRONE_JOB_STARTED",
 		},
 		cli.StringFlag{
-			Name:   "customBlock",
+			Name:   "custom-block",
 			Usage:  "custom block to send to slack. ",
 			EnvVar: "PLUGIN_CUSTOM_BLOCK",
 		},
 		cli.StringFlag{
-			Name:   "accessToken",
+			Name:   "access-token",
 			Usage:  "slack access token",
-			EnvVar: "SLACK_ACCESS_TOKEN",
+			EnvVar: "PLUGIN_ACCESS_TOKEN,SLACK_ACCESS_TOKEN",
 		},
 		cli.StringFlag{
 			Name:   "mentions",
@@ -203,7 +203,7 @@ func main() {
 			EnvVar: "PLUGIN_MENTIONS",
 		},
 		cli.StringFlag{
-			Name:   "customTemplate",
+			Name:   "custom-template",
 			Usage:  "prebuilt custom template for the message.",
 			EnvVar: "PLUGIN_CUSTOM_TEMPLATE",
 		},
@@ -266,10 +266,10 @@ func run(c *cli.Context) error {
 			IconEmoji:      c.String("icon.emoji"),
 			Color:          c.String("color"),
 			LinkNames:      c.Bool("link-names"),
-			CustomBlock:    c.String("customBlock"),
-			AccessToken:    c.String("accessToken"),
+			CustomBlock:    c.String("custom-block"),
+			AccessToken:    c.String("access-token"),
 			Mentions:       c.String("mentions"),
-			CustomTemplate: c.String("customTemplate"),
+			CustomTemplate: c.String("custom-template"),
 			Message:        c.String("message"),
 		},
 	}
