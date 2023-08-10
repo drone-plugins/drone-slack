@@ -1,5 +1,5 @@
 # escape=`
-FROM plugins/base:windows-1809-amd64@sha256:61095306fa56d51adc841f2b0f93f511efb5792d12f2549bb2eb1cbce02c1f05
+FROM plugins/base:windows-1809-amd64@sha256:a5493cfd5ef8326296121233e392437ca535dcf8097f15edafd727fcf2d43ed6
 USER ContainerAdministrator
 
 ENV GODEBUG=netdns=go
