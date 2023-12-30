@@ -7,7 +7,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/slack-go/slack v0.12.2
 	github.com/urfave/cli v1.22.14
-	github.com/urfave/cli/v2 v2.25.7
+	github.com/urfave/cli/v2 v2.27.1
 	gotest.tools/v3 v3.5.1
 )
 
