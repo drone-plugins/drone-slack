@@ -320,12 +320,6 @@ func (p Plugin) UploadFile() error {
 
 	p.Config.FilePath = strings.TrimSpace(p.Config.FilePath)
 
-	fmt.Println(p.Config.FilePath)
-	fmt.Println(p.Config.AccessToken)
-	fmt.Println(p.Config.InitialComment)
-	fmt.Println(p.Config.Title)
-	fmt.Println(p.Config.FileName)
-
 	api := slack.New(p.Config.AccessToken)
 	fileSize, err := GetFileSize(p.Config.FilePath)
 	if err != nil {
@@ -348,8 +342,6 @@ func (p Plugin) UploadFile() error {
 		return err
 	}
 	fmt.Printf("Name: %s, URL: %s\n", file.ID, file.Title)
-
-	os.Exit(0)
 
 	return nil
 }

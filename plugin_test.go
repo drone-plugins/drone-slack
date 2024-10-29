@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -181,4 +182,38 @@ func getTestConfig() Config {
 		Template: t,
 		Fallback: tf,
 	}
+}
+
+func TestFileUpload(t *testing.T) {
+
+	if !IsAllFileUploadParamsSet() {
+		t.Fatal("File upload params not set in env variables")
+	}
+
+	cfg := Config{
+		Channel:        os.Getenv("PLUGIN_CHANNEL"),
+		AccessToken:    os.Getenv("PLUGIN_ACCESS_TOKEN"),
+		FilePath:       os.Getenv("PLUGIN_FILE_PATH"),
+		FileName:       os.Getenv("PLUGIN_FILE_NAME"),
+		InitialComment: os.Getenv("PLUGIN_INITIAL_COMMENT"),
+		Title:          os.Getenv("PLUGIN_TITLE"),
+	}
+
+	plugin := Plugin{
+		Repo:   getTestRepo(),
+		Build:  getTestBuild(),
+		Job:    getTestJob(),
+		Config: cfg,
+	}
+
+	_ = plugin.Exec()
+}
+
+func IsAllFileUploadParamsSet() bool {
+	return os.Getenv("PLUGIN_CHANNEL") != "" &&
+		os.Getenv("PLUGIN_ACCESS_TOKEN") != "" &&
+		os.Getenv("PLUGIN_FILE_PATH") != "" &&
+		os.Getenv("PLUGIN_FILE_NAME") != "" &&
+		os.Getenv("PLUGIN_INITIAL_COMMENT") != "" &&
+		os.Getenv("PLUGIN_TITLE") != ""
 }
