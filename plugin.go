@@ -70,12 +70,11 @@ type (
 		Mentions       string
 		CustomTemplate string
 		Message        string
+		// File Upload attributes
 		FilePath       string
 		FileName       string
-
-		CredentialsSecretId string
-		InitialComment      string
-		FailOnError         bool
+		InitialComment string
+		Title          string
 	}
 
 	Job struct {
@@ -321,9 +320,11 @@ func (p Plugin) UploadFile() error {
 
 	p.Config.FilePath = strings.TrimSpace(p.Config.FilePath)
 
-	fmt.Println("File Path: ", p.Config.FilePath)
+	fmt.Println(p.Config.FilePath)
 	fmt.Println(p.Config.AccessToken)
 	fmt.Println(p.Config.InitialComment)
+	fmt.Println(p.Config.Title)
+	fmt.Println(p.Config.FileName)
 
 	api := slack.New(p.Config.AccessToken)
 	fileSize, err := GetFileSize(p.Config.FilePath)
@@ -334,14 +335,11 @@ func (p Plugin) UploadFile() error {
 
 	params := slack.UploadFileV2Parameters{
 		File:           p.Config.FilePath,
-		FileSize:       fileSize,
-		Filename:       "testfile",
-		Title:          "testtitle",
-		InitialComment: p.Config.InitialComment,
 		Channel:        p.Config.Channel,
-		//ThreadTimestamp: "",
-		//AltTxt:          "",
-		//SnippetText:     "",
+		Filename:       p.Config.FileName,
+		Title:          p.Config.Title,
+		InitialComment: p.Config.InitialComment,
+		FileSize:       fileSize,
 	}
 
 	file, err := api.UploadFileV2(params)

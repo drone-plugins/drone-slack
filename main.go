@@ -212,27 +212,27 @@ func main() {
 			Usage:  "slack message. either this or the custom template must be set. ",
 			EnvVar: "PLUGIN_MESSAGE",
 		},
-		//
+
 		// File send params
 		cli.StringFlag{
 			Name:   "filepath",
 			Usage:  "slack file path",
-			EnvVar: "PLUGIN_FILEPATH",
+			EnvVar: "PLUGIN_FILE_PATH",
 		},
 		cli.StringFlag{
-			Name:   "token_secret_id",
-			Usage:  "slack credentials secret id",
-			EnvVar: "PLUGIN_TOKEN_SECRET_ID",
+			Name:   "filename",
+			Usage:  "slack file name",
+			EnvVar: "PLUGIN_FILE_NAME",
+		},
+		cli.StringFlag{
+			Name:   "title",
+			Usage:  "slack title",
+			EnvVar: "PLUGIN_TITLE",
 		},
 		cli.StringFlag{
 			Name:   "initial_comment",
 			Usage:  "slack initial comment",
 			EnvVar: "PLUGIN_INITIAL_COMMENT",
-		},
-		cli.BoolFlag{
-			Name:   "fail_on_error",
-			Usage:  "slack fail on error",
-			EnvVar: "PLUGIN_FAIL_ON_ERROR",
 		},
 	}
 
@@ -293,7 +293,10 @@ func run(c *cli.Context) error {
 			Mentions:       c.String("mentions"),
 			CustomTemplate: c.String("custom.template"),
 			Message:        c.String("message"),
+			// File upload attributes
 			FilePath:       c.String("filepath"),
+			FileName:       c.String("filename"),
+			Title:          c.String("title"),
 			InitialComment: c.String("initial_comment"),
 		},
 	}
