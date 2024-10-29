@@ -212,6 +212,28 @@ func main() {
 			Usage:  "slack message. either this or the custom template must be set. ",
 			EnvVar: "PLUGIN_MESSAGE",
 		},
+		//
+		// File send params
+		cli.StringFlag{
+			Name:   "filepath",
+			Usage:  "slack file path",
+			EnvVar: "PLUGIN_FILEPATH",
+		},
+		cli.StringFlag{
+			Name:   "token_secret_id",
+			Usage:  "slack credentials secret id",
+			EnvVar: "PLUGIN_TOKEN_SECRET_ID",
+		},
+		cli.StringFlag{
+			Name:   "initial_comment",
+			Usage:  "slack initial comment",
+			EnvVar: "PLUGIN_INITIAL_COMMENT",
+		},
+		cli.BoolFlag{
+			Name:   "fail_on_error",
+			Usage:  "slack fail on error",
+			EnvVar: "PLUGIN_FAIL_ON_ERROR",
+		},
 	}
 
 	if _, err := os.Stat("/run/drone/env"); err == nil {
@@ -271,8 +293,11 @@ func run(c *cli.Context) error {
 			Mentions:       c.String("mentions"),
 			CustomTemplate: c.String("custom.template"),
 			Message:        c.String("message"),
+			FilePath:       c.String("filepath"),
+			InitialComment: c.String("initial_comment"),
 		},
 	}
+
 	if plugin.Build.Commit == "" {
 		plugin.Build.Commit = "0000000000000000000000000000000000000000"
 	}

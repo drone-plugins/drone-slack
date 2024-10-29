@@ -70,6 +70,12 @@ type (
 		Mentions       string
 		CustomTemplate string
 		Message        string
+		FilePath       string
+		FileName       string
+
+		CredentialsSecretId string
+		InitialComment      string
+		FailOnError         bool
 	}
 
 	Job struct {
@@ -110,6 +116,10 @@ func (p Plugin) Exec() error {
 	var channel string
 	var text string
 	var fallbackText string
+
+	if p.Config.FilePath != "" {
+		return p.UploadFile()
+	}
 
 	// Determine the channel
 	if p.Config.Recipient != "" {
@@ -305,6 +315,53 @@ func (p Plugin) Exec() error {
 
 	// Post the message with the webhook
 	return slack.PostWebhook(p.Config.Webhook, &payload)
+}
+
+func (p Plugin) UploadFile() error {
+
+	p.Config.FilePath = strings.TrimSpace(p.Config.FilePath)
+
+	fmt.Println("File Path: ", p.Config.FilePath)
+	fmt.Println(p.Config.AccessToken)
+	fmt.Println(p.Config.InitialComment)
+
+	api := slack.New(p.Config.AccessToken)
+	fileSize, err := GetFileSize(p.Config.FilePath)
+	if err != nil {
+		fmt.Printf("Error getting file size: %s\n", err.Error())
+		return err
+	}
+
+	params := slack.UploadFileV2Parameters{
+		File:           p.Config.FilePath,
+		FileSize:       fileSize,
+		Filename:       "testfile",
+		Title:          "testtitle",
+		InitialComment: p.Config.InitialComment,
+		Channel:        p.Config.Channel,
+		//ThreadTimestamp: "",
+		//AltTxt:          "",
+		//SnippetText:     "",
+	}
+
+	file, err := api.UploadFileV2(params)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return err
+	}
+	fmt.Printf("Name: %s, URL: %s\n", file.ID, file.Title)
+
+	os.Exit(0)
+
+	return nil
+}
+
+func GetFileSize(filePath string) (int, error) {
+	fileInfo, err := os.Stat(filePath)
+	if err != nil {
+		return 0, err
+	}
+	return int(fileInfo.Size()), nil
 }
 
 func templateMessage(t string, plugin Plugin) (string, error) {
