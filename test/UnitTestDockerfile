@@ -1,0 +1,18 @@
+# Start with an Alpine-based image with JRE 8
+FROM eclipse-temurin:8-jre-alpine
+
+# Set environment variables for Golang
+ENV PATH=$PATH:/usr/local/go/bin
+
+# Install Golang using Alpine's package manager
+RUN apk update && \
+    apk add --no-cache go
+
+# Verify the installations
+RUN java -version && go version
+
+# Set the working directory
+WORKDIR /app
+
+# Default command
+CMD ["/bin/sh"]

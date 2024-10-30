@@ -186,10 +186,6 @@ func getTestConfig() Config {
 
 func TestFileUpload(t *testing.T) {
 
-	if !IsAllFileUploadParamsSet() {
-		t.Fatal("File upload params not set in env variables")
-	}
-
 	cfg := Config{
 		Channel:        os.Getenv("PLUGIN_CHANNEL"),
 		AccessToken:    os.Getenv("PLUGIN_ACCESS_TOKEN"),
@@ -206,14 +202,18 @@ func TestFileUpload(t *testing.T) {
 		Config: cfg,
 	}
 
-	_ = plugin.Exec()
-}
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		out, _ := io.ReadAll(r.Body)
+		got := string(out)
 
-func IsAllFileUploadParamsSet() bool {
-	return os.Getenv("PLUGIN_CHANNEL") != "" &&
-		os.Getenv("PLUGIN_ACCESS_TOKEN") != "" &&
-		os.Getenv("PLUGIN_FILE_PATH") != "" &&
-		os.Getenv("PLUGIN_FILE_NAME") != "" &&
-		os.Getenv("PLUGIN_INITIAL_COMMENT") != "" &&
-		os.Getenv("PLUGIN_TITLE") != ""
+		want := `{"attachments":[{"color":"good","fallback":"success octocat/hello-world#7fd1a60b (master) by octocat","text":"*success* \u003chttp://github.com/octocat/hello-world|octocat/hello-world#7fd1a60b\u003e (master) by octocat","mrkdwn_in":["text","fallback"],"blocks":null}],"replace_original":false,"delete_original":false}`
+		assert.Equal(t, got, want)
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	plugin.Config.Webhook = server.URL
+
+	_ = plugin.Exec()
 }
