@@ -26,7 +26,9 @@ GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -tags netgo -o release/linux/a
 docker build --rm -t plugins/slack .
 ```
 
-## Usage
+## Send Slack messages Usage
+
+To Send Slack messages use the following
 
 Execute from the working directory:
 
@@ -50,7 +52,6 @@ docker run --rm \
   plugins/slack
 ```
 
-
 Please note the following new environment variables:
 
 - `SLACK_ACCESS_TOKEN`: The access token for Slack API authentication.
@@ -59,6 +60,33 @@ Please note the following new environment variables:
 Make sure to replace `your_access_token` with your actual Slack access token and adjust
 
 If you provide an access token, it will use the Slack API to send the message. Otherwise, it will use the webhook.
+
+
+## Upload files on Slack Usage
+
+To Send Slack messages use the following
+
+Execute from the working directory:
+```
+docker run --network host --rm \
+  -e SLACK_ACCESS_TOKEN=xoxb-791....   \
+  -e PLUGIN_CHANNEL=C07TL1KNV8Q \
+  -e PLUGIN_USERNAME=jenkinstest003app \
+  -e PLUGIN_FILE_PATH='/home/hns/test/b.txt' \
+  -e PLUGIN_INITIAL_COMMENT='some start of text' \
+  -e PLUGIN_TITLE='Build OK now' \
+  plugins/slack
+```
+
+Please note the following new environment variables:
+
+- `SLACK_ACCESS_TOKEN`: The access token for Slack API authentication.
+- `PLUGIN_CUSTOM_BLOCK`: Custom blocks in JSON format to include in the Slack message.
+
+Make sure to replace `your_access_token` with your actual Slack access token and adjust
+
+If you provide an access token, it will use the Slack API to send the message.
+
 
 ## Release Preparation
 
