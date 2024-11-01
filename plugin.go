@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -75,6 +76,7 @@ type (
 		FileName       string
 		InitialComment string
 		Title          string
+		FailOnError    bool
 	}
 
 	Job struct {
@@ -336,14 +338,98 @@ func (p Plugin) UploadFile() error {
 		FileSize:       fileSize,
 	}
 
-	file, err := api.UploadFileV2(params)
-	if err != nil {
-		fmt.Printf("%s\n", err.Error())
-		return err
+	slackSummary, err := api.UploadFileV2(params)
+
+	if !p.Config.FailOnError && slackSummary == nil {
+		if err != nil {
+			fmt.Println("Bad Api ret val, upload file failed but passing build as PLUGIN_FAIL_ON_ERROR is false")
+		}
+		return nil
+	} else if p.Config.FailOnError && slackSummary == nil {
+		fmt.Println("Bad ret val,  Failed to upload file, failing build")
+		_ = p.WriteFileUploadResult("", "", err)
+		return fmt.Errorf("Bad ret val, Failed to upload file %s ", p.Config.FilePath)
 	}
-	fmt.Printf("Name: %s, URL: %s\n", file.ID, file.Title)
+
+	if !p.Config.FailOnError && err != nil {
+		if err != nil {
+			fmt.Println("Unable to upload file but passing build PLUGIN_FAIL_ON_ERROR is false")
+		}
+		return nil
+	} else if p.Config.FailOnError && err != nil {
+		fmt.Println("Upload API Failed to upload file, failing build")
+		_ = p.WriteFileUploadResult("", "", err)
+		return fmt.Errorf("Failed to upload file %s ", p.Config.FilePath)
+	}
+
+	err = p.WriteFileUploadResult(slackSummary.ID, slackSummary.Title, err)
+	if !p.Config.FailOnError {
+		if err != nil {
+			fmt.Println("Unable to Write output env var results for file upload " +
+				"but passing build PLUGIN_FAIL_ON_ERROR is false")
+		}
+		return nil
+	}
 
 	return nil
+}
+
+func (p Plugin) WriteFileUploadResult(slackFileId, title string, err error) error {
+
+	type EnvKvPair struct {
+		Key   string
+		Value interface{}
+	}
+
+	resultStr := "Failed: Slack file upload failed"
+	if err == nil {
+		resultStr = "Success: Slack file upload successful"
+	}
+
+	var kvPairs = []EnvKvPair{
+		{Key: "UPLOAD_OK_STATUS", Value: resultStr},
+		{Key: "UPLOAD_FILE_PATH", Value: p.Config.FilePath},
+	}
+
+	var retErr error = nil
+
+	for _, kvPair := range kvPairs {
+		err := WriteEnvVariableAsString(kvPair.Key, kvPair.Value)
+		if err != nil {
+			retErr = err
+		}
+	}
+
+	return retErr
+}
+
+func WriteEnvVariableAsString(key string, value interface{}) error {
+
+	if GetOutputVariablesStorageFilePath() == "" {
+		return errors.New("Output file path is empty, check env var DRONE_OUTPUT")
+	}
+
+	outputFile, err := os.OpenFile(GetOutputVariablesStorageFilePath(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open output file: %w", err)
+	}
+	defer outputFile.Close()
+
+	valueStr := fmt.Sprintf("%v", value)
+
+	_, err = fmt.Fprintf(outputFile, "%s=%s\n", key, valueStr)
+	if err != nil {
+		return fmt.Errorf("failed to write to env: %w", err)
+	}
+
+	return nil
+}
+
+func GetOutputVariablesStorageFilePath() string {
+	if os.Getenv("DRONE_OUTPUT") == "" {
+		return "/tmp/drone-output"
+	}
+	return os.Getenv("DRONE_OUTPUT")
 }
 
 func GetFileSize(filePath string) (int, error) {

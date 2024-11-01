@@ -234,6 +234,11 @@ func main() {
 			Usage:  "slack initial comment",
 			EnvVar: "PLUGIN_INITIAL_COMMENT",
 		},
+		cli.BoolFlag{
+			Name:   "fail_on_error",
+			Usage:  "fail build on error",
+			EnvVar: "PLUGIN_FAIL_ON_ERROR",
+		},
 	}
 
 	if _, err := os.Stat("/run/drone/env"); err == nil {
@@ -298,6 +303,7 @@ func run(c *cli.Context) error {
 			FileName:       c.String("filename"),
 			Title:          c.String("title"),
 			InitialComment: c.String("initial_comment"),
+			FailOnError:    c.Bool("fail_on_error"),
 		},
 	}
 
