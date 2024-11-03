@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	textTemplate "text/template"
 
@@ -327,6 +328,11 @@ func (p Plugin) UploadFile() error {
 	if err != nil {
 		fmt.Printf("Error getting file size: %s\n", err.Error())
 		return err
+	}
+
+	if p.Config.FileName == "" {
+		fileName := filepath.Base(p.Config.FilePath)
+		p.Config.FileName = fileName
 	}
 
 	params := slack.UploadFileV2Parameters{
