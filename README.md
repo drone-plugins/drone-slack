@@ -62,7 +62,7 @@ Make sure to replace `your_access_token` with your actual Slack access token and
 If you provide an access token, it will use the Slack API to send the message. Otherwise, it will use the webhook.
 
 
-## Upload files on Slack Usage
+## Upload files to Slack
 
 To Send Slack messages use the following
 
