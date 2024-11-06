@@ -69,7 +69,7 @@ To Send Slack messages use the following
 Execute from the working directory:
 ```
 docker run --network host --rm \
-  -e SLACK_ACCESS_TOKEN=xoxb-791....   \
+  -e PLUGIN_ACCESS_TOKEN=your_access_token   \
   -e PLUGIN_CHANNEL=C07TL1KNV8Q \
   -e PLUGIN_USERNAME=jenkinstest003app \
   -e PLUGIN_FILE_PATH='/home/hns/test/b.txt' \
