@@ -431,12 +431,6 @@ func WriteEnvVariableAsString(key string, value interface{}) error {
 	return nil
 }
 
-func GetOutputVariablesStorageFilePath() string {
-	if os.Getenv("DRONE_OUTPUT") == "" {
-		return "/tmp/drone-output"
-	}
-	return os.Getenv("DRONE_OUTPUT")
-}
 
 func GetFileSize(filePath string) (int, error) {
 	fileInfo, err := os.Stat(filePath)
