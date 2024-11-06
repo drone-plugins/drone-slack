@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -384,7 +383,7 @@ func (p Plugin) WriteFileUploadResult(slackFileId, title string, err error) erro
 
 	type EnvKvPair struct {
 		Key   string
-		Value interface{}
+		Value string
 	}
 
 	resultStr := "Failed: Slack file upload failed"
@@ -400,7 +399,7 @@ func (p Plugin) WriteFileUploadResult(slackFileId, title string, err error) erro
 	var retErr error = nil
 
 	for _, kvPair := range kvPairs {
-		err := WriteEnvVariableAsString(kvPair.Key, kvPair.Value)
+		err := WriteEnvToOutputFile(kvPair.Key, kvPair.Value)
 		if err != nil {
 			retErr = err
 		}
@@ -409,32 +408,20 @@ func (p Plugin) WriteFileUploadResult(slackFileId, title string, err error) erro
 	return retErr
 }
 
-func WriteEnvVariableAsString(key string, value interface{}) error {
-
-	if GetOutputVariablesStorageFilePath() == "" {
-		return errors.New("Output file path is empty, check env var DRONE_OUTPUT")
-	}
-
-	outputFile, err := os.OpenFile(GetOutputVariablesStorageFilePath(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+func WriteEnvToOutputFile(key, value string) error {
+	outputFile, err := os.OpenFile(os.Getenv("DRONE_OUTPUT"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to open output file: %w", err)
 	}
 	defer outputFile.Close()
-
-	valueStr := fmt.Sprintf("%v", value)
-
-	_, err = fmt.Fprintf(outputFile, "%s=%s\n", key, valueStr)
+	_, err = fmt.Fprintf(outputFile, "%s=%s\n", key, value)
 	if err != nil {
 		return fmt.Errorf("failed to write to env: %w", err)
 	}
-
 	return nil
 }
 
 func GetOutputVariablesStorageFilePath() string {
-	if os.Getenv("DRONE_OUTPUT") == "" {
-		return "/tmp/drone-output"
-	}
 	return os.Getenv("DRONE_OUTPUT")
 }
 
