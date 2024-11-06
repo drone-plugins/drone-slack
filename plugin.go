@@ -424,7 +424,10 @@ func WriteEnvToOutputFile(key, value string) error {
 func GetFileSize(filePath string) (int, error) {
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to get file info: %w", err)
+	}
+	if fileInfo.IsDir() {
+		return 0, fmt.Errorf("path %s is a directory, not a file", filePath)
 	}
 	return int(fileInfo.Size()), nil
 }
