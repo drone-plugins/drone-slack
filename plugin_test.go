@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -181,4 +182,38 @@ func getTestConfig() Config {
 		Template: t,
 		Fallback: tf,
 	}
+}
+
+func TestFileUpload(t *testing.T) {
+
+	cfg := Config{
+		Channel:        os.Getenv("PLUGIN_CHANNEL"),
+		AccessToken:    os.Getenv("PLUGIN_ACCESS_TOKEN"),
+		FilePath:       os.Getenv("PLUGIN_FILE_PATH"),
+		FileName:       os.Getenv("PLUGIN_FILE_NAME"),
+		InitialComment: os.Getenv("PLUGIN_INITIAL_COMMENT"),
+		Title:          os.Getenv("PLUGIN_TITLE"),
+	}
+
+	plugin := Plugin{
+		Repo:   getTestRepo(),
+		Build:  getTestBuild(),
+		Job:    getTestJob(),
+		Config: cfg,
+	}
+
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		out, _ := io.ReadAll(r.Body)
+		got := string(out)
+
+		want := `{"attachments":[{"color":"good","fallback":"success octocat/hello-world#7fd1a60b (master) by octocat","text":"*success* \u003chttp://github.com/octocat/hello-world|octocat/hello-world#7fd1a60b\u003e (master) by octocat","mrkdwn_in":["text","fallback"],"blocks":null}],"replace_original":false,"delete_original":false}`
+		assert.Equal(t, got, want)
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	plugin.Config.Webhook = server.URL
+
+	_ = plugin.Exec()
 }
