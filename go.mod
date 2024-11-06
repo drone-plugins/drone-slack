@@ -7,7 +7,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/slack-go/slack v0.12.2
 	github.com/urfave/cli v1.22.14
-	github.com/urfave/cli/v2 v2.25.7
+	github.com/urfave/cli/v2 v2.27.5
 	gotest.tools/v3 v3.5.1
 )
 
@@ -16,7 +16,7 @@ require (
 	github.com/Masterminds/semver v1.4.2 // indirect
 	github.com/Masterminds/sprig v2.18.0+incompatible // indirect
 	github.com/aymerick/raymond v2.0.2+incompatible // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.1.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
