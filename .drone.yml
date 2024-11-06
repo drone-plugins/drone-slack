@@ -9,7 +9,7 @@ pool:
 
 steps:
   - name: lint
-    image: golang:1.21
+    image: golang:1.22
     pull: always
     commands:
       - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
