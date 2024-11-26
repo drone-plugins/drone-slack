@@ -565,8 +565,6 @@ func getGitEmails(dir string) ([]string, error) {
 		return emailList, fmt.Errorf("failed to execute git command: %v\nOutput: %s", err, out.String())
 	}
 
-	//fmt.Println("")
-	//fmt.Printf("|%s| \n", out.String())
 	return cleanupAndSplitEmails(out.String()), nil
 }
 
