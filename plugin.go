@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	textTemplate "text/template"
 
@@ -550,10 +551,18 @@ func getSlackUserIDByEmail(accessToken, email string) (string, error) {
 	return user.ID, nil
 }
 
+func getGitCommittersCommand(dir string) *exec.Cmd {
+	if runtime.GOOS == "windows" {
+		gitLogCmd := "git log --format='%ae' | Sort-Object | Get-Unique"
+		return exec.Command("powershell", "-Command", gitLogCmd)
+	}
+	return exec.Command("bash", "-c", "set -e; git log --format='%ae' | sort | uniq")
+}
+
 func getGitEmails(dir string) ([]string, error) {
 	var emailList []string
 
-	cmd := exec.Command("bash", "-c", "set -e; git log --format='%ae' | sort | uniq")
+	cmd := getGitCommittersCommand(dir) //exec.Command("bash", "-c", "set -e; git log --format='%ae' | sort | uniq")
 	cmd.Dir = dir
 
 	var out bytes.Buffer
