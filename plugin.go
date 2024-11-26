@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	textTemplate "text/template"
@@ -77,6 +78,10 @@ type (
 		InitialComment string
 		Title          string
 		FailOnError    bool
+		// Get Slack ID of the user by email
+		SlackIdOf string
+		// Git path to get list of committer emails
+		CommitterListGitPath string
 	}
 
 	Job struct {
@@ -120,6 +125,14 @@ func (p Plugin) Exec() error {
 
 	if p.Config.FilePath != "" {
 		return p.UploadFile()
+	}
+
+	if p.Config.SlackIdOf != "" {
+		return GetSlackIdFromEmail(&p)
+	}
+
+	if p.Config.CommitterListGitPath != "" {
+		return GetSlackIdsOfCommitters(&p)
 	}
 
 	// Determine the channel
@@ -408,6 +421,29 @@ func (p Plugin) WriteFileUploadResult(slackFileId, title string, err error) erro
 	return retErr
 }
 
+func GetSlackIdsOfCommitters(p *Plugin) error {
+	if p.Config.CommitterListGitPath == DefaultWorkspace {
+		p.Config.CommitterListGitPath = os.Getenv("DRONE_WORKSPACE")
+	}
+	emails, err := getGitEmails(p.Config.CommitterListGitPath)
+	if err != nil {
+		return fmt.Errorf("failed to get git emails: %w", err)
+	}
+	var slackIdsList []string
+	for _, email := range emails {
+		slackId, err := getSlackUserIDByEmail(p.Config.AccessToken, email)
+		if err != nil {
+			continue
+		}
+		slackIdsList = append(slackIdsList, slackId)
+	}
+	slackIdsListStr := strings.Join(slackIdsList, ",")
+	err = WriteEnvToOutputFile("COMMITTER_SLACK_ID_LIST", slackIdsListStr)
+	if err != nil {
+		return fmt.Errorf("failed to write git emails to output file: %w", err)
+	}
+	return nil
+}
 func WriteEnvToOutputFile(key, value string) error {
 	outputFile, err := os.OpenFile(os.Getenv("DRONE_OUTPUT"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -482,3 +518,53 @@ func prepend(prefix, s string) string {
 
 	return s
 }
+
+func GetSlackIdFromEmail(p *Plugin) error {
+
+	slackId, err := getSlackUserIDByEmail(p.Config.AccessToken, p.Config.SlackIdOf)
+	if err != nil {
+		return fmt.Errorf("failed to get Slack ID by email: %w", err)
+	}
+	err = WriteEnvToOutputFile("FOUND_SLACK_ID", slackId)
+	if err != nil {
+		return fmt.Errorf("failed to write Slack ID to output file: %w", err)
+	}
+	fmt.Println("Slack ID: ", slackId)
+	return nil
+}
+
+func getSlackUserIDByEmail(accessToken, email string) (string, error) {
+	api := slack.New(accessToken)
+	if api == nil {
+		return "", fmt.Errorf("failed to create Slack client")
+	}
+
+	user, err := api.GetUserByEmail(email)
+	if err != nil {
+		return "", fmt.Errorf("failed to get user by email: %w", err)
+	}
+
+	return user.ID, nil
+}
+
+func getGitEmails(dir string) ([]string, error) {
+	var emailList []string
+
+	cmd := exec.Command("bash", "-c", "set -e; git log --format='%ae' | sort | uniq")
+	cmd.Dir = dir
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+
+	if err := cmd.Run(); err != nil {
+		return emailList, fmt.Errorf("failed to execute git command: %v\nOutput: %s", err, out.String())
+	}
+
+	fmt.Printf("Output: |%s| \n", out.String())
+	return emailList, nil
+}
+
+const (
+	DefaultWorkspace = "DRONE_WORKSPACE"
+)
