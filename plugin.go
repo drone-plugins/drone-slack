@@ -562,7 +562,7 @@ func getGitCommittersCommand(dir string) *exec.Cmd {
 func getGitEmails(dir string) ([]string, error) {
 	var emailList []string
 
-	cmd := getGitCommittersCommand(dir) //exec.Command("bash", "-c", "set -e; git log --format='%ae' | sort | uniq")
+	cmd := getGitCommittersCommand(dir)
 	cmd.Dir = dir
 
 	var out bytes.Buffer
