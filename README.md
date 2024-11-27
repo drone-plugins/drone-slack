@@ -105,8 +105,8 @@ docker run --network host --rm \
 -e PLUGIN_COMMITTER_LIST_GIT_PATH=/harness \
 plugins/slack
 ```
-Output will be stored in the COMMITTER_SLACK_ID_LIST environment variable as comma separated values
-Make sure to replace `your_access_token` with your actual Slack access token and adjust
+Output will be stored in the COMMITTER_SLACK_ID_LIST environment variable as comma separated values.
+Make sure to replace `your_access_token` with your actual Slack access token and adjust.
 
 ## Release Preparation
 
