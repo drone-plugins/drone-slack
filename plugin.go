@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	textTemplate "text/template"
 
@@ -362,22 +365,22 @@ func (p Plugin) UploadFile() error {
 
 	if !p.Config.FailOnError && slackSummary == nil {
 		if err != nil {
-			fmt.Println("Bad Api ret val, upload file failed but passing build as PLUGIN_FAIL_ON_ERROR is false")
+			log.Println("Bad Api ret val, upload file failed but passing build as PLUGIN_FAIL_ON_ERROR is false")
 		}
 		return nil
 	} else if p.Config.FailOnError && slackSummary == nil {
-		fmt.Println("Bad ret val,  Failed to upload file, failing build")
+		log.Println("Bad ret val,  Failed to upload file, failing build")
 		_ = p.WriteFileUploadResult("", "", err)
 		return fmt.Errorf("Bad ret val, Failed to upload file %s ", p.Config.FilePath)
 	}
 
 	if !p.Config.FailOnError && err != nil {
 		if err != nil {
-			fmt.Println("Unable to upload file but passing build PLUGIN_FAIL_ON_ERROR is false")
+			log.Println("Unable to upload file but passing build PLUGIN_FAIL_ON_ERROR is false")
 		}
 		return nil
 	} else if p.Config.FailOnError && err != nil {
-		fmt.Println("Upload API Failed to upload file, failing build")
+		log.Println("Upload API Failed to upload file, failing build")
 		_ = p.WriteFileUploadResult("", "", err)
 		return fmt.Errorf("Failed to upload file %s ", p.Config.FilePath)
 	}
@@ -385,7 +388,7 @@ func (p Plugin) UploadFile() error {
 	err = p.WriteFileUploadResult(slackSummary.ID, slackSummary.Title, err)
 	if !p.Config.FailOnError {
 		if err != nil {
-			fmt.Println("Unable to Write output env var results for file upload " +
+			log.Println("Unable to Write output env var results for file upload " +
 				"but passing build PLUGIN_FAIL_ON_ERROR is false")
 		}
 		return nil
@@ -504,10 +507,6 @@ func GetSlackIdsOfCommitters(p *Plugin) error {
 	}
 
 	emails, err := GetChangesetAuthorsList(p.Config.RecentCommitId, p.Config.OldCommitId, p.Config.CommitterListGitPath)
-	for _, email := range emails {
-		fmt.Println("Email: ", email)
-	}
-
 	if err != nil {
 		return fmt.Errorf("failed to get git emails: %w", err)
 	}
@@ -515,7 +514,6 @@ func GetSlackIdsOfCommitters(p *Plugin) error {
 	for _, email := range emails {
 		slackId, err := getSlackUserIDByEmail(p.Config.AccessToken, email)
 		if err != nil {
-			//log.Printf("Failed to get Slack ID for email %s: %s\n", email, err.Error())
 			continue
 		}
 
@@ -557,34 +555,21 @@ func getSlackUserIDByEmail(accessToken, email string) (string, error) {
 }
 
 func GetChangesetAuthorsList(newCommitId, oldCommitId, gitDir string) ([]string, error) {
-	fmt.Println("newCommitId: ", newCommitId)
-	fmt.Println("oldCommitId: ", oldCommitId)
-	fmt.Println("gitDir: ", gitDir)
 	if gitDir == "" {
-		fmt.Println("gitDir is empty")
+		log.Println("gitDir is empty")
 		return nil, fmt.Errorf("gitDir cannot be empty")
 	}
 	if newCommitId != "HEAD" && len(newCommitId) == 0 {
 		return nil, fmt.Errorf("newCommitId cannot be empty")
 	}
-	if newCommitId == "HEAD" {
-		if _, err := fmt.Sscanf(oldCommitId, "%d", &struct{}{}); err != nil {
-			return nil, fmt.Errorf("oldCommitId must be a valid number when newCommitId is HEAD")
-		}
-	}
-
-	var commitRange string
-	if newCommitId == "HEAD" {
-		commitRange = fmt.Sprintf("HEAD~%s..HEAD", oldCommitId)
-	} else {
-		commitRange = fmt.Sprintf("%s..%s", oldCommitId, newCommitId)
-	}
 
 	absGitDir, err := filepath.Abs(gitDir)
 	if err != nil {
+		log.Println("Failed to get absolute path of gitDir: ", gitDir)
 		return nil, fmt.Errorf("failed to get absolute path of gitDir: %w", err)
 	}
 
+	commitRange := getCommitRange(oldCommitId, newCommitId)
 	cmd := exec.Command("git", "-C", absGitDir, "log", "--format=%ae", commitRange)
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -611,6 +596,34 @@ func GetChangesetAuthorsList(newCommitId, oldCommitId, gitDir string) ([]string,
 	return uniqueEmails, nil
 }
 
+func getCommitRange(oldCommitId, newCommitId string) string {
+	var commitRange string
+	commitRange = fmt.Sprintf("%s..%s", oldCommitId, newCommitId)
+
+	if newCommitId == "HEAD" {
+		switch getCommitIdType(oldCommitId) {
+		case HeadWithNumber:
+			commitRange = fmt.Sprintf("HEAD~%s..HEAD", oldCommitId)
+		case HeadWithShaId:
+			commitRange = fmt.Sprintf("%s..HEAD", oldCommitId)
+		}
+	}
+	return commitRange
+}
+
+func getCommitIdType(input string) string {
+	shaRegex := regexp.MustCompile(`^[a-fA-F0-9]{40}$`)
+	if shaRegex.MatchString(input) {
+		return HeadWithShaId
+	}
+	if _, err := strconv.Atoi(input); err == nil {
+		return HeadWithNumber
+	}
+	return "Unknown"
+}
+
 const (
 	DefaultWorkspace = "DRONE_WORKSPACE"
+	HeadWithNumber   = "HeadWithNumber"
+	HeadWithShaId    = "HeadWithShaId"
 )
