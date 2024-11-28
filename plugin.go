@@ -595,6 +595,10 @@ func GetChangesetAuthorsList(gitDir string) ([]string, error) {
 	}
 
 	emailLines := strings.Split(out.String(), "\n")
+	if len(emailLines) == 0 {
+		return nil, fmt.Errorf("Unable to get email from git log")
+	}
+
 	emailSet := make(map[string]struct{})
 	for _, email := range emailLines {
 		if strings.TrimSpace(email) != "" {
