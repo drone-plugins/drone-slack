@@ -85,8 +85,7 @@ type (
 		SlackIdOf string
 		// Git path to get list of committer emails
 		CommitterListGitPath string
-		RecentCommitId       string
-		OldCommitId          string
+		CommitterSlackId     bool
 	}
 
 	Job struct {
@@ -136,7 +135,7 @@ func (p Plugin) Exec() error {
 		return GetSlackIdFromEmail(&p)
 	}
 
-	if p.Config.CommitterListGitPath != "" {
+	if p.Config.CommitterSlackId {
 		return GetSlackIdsOfCommitters(&p)
 	}
 
@@ -343,7 +342,7 @@ func (p Plugin) UploadFile() error {
 	api := slack.New(p.Config.AccessToken)
 	fileSize, err := GetFileSize(p.Config.FilePath)
 	if err != nil {
-		fmt.Printf("Error getting file size: %s\n", err.Error())
+		log.Printf("Error getting file size: %s\n", err.Error())
 		return err
 	}
 
@@ -506,7 +505,7 @@ func GetSlackIdsOfCommitters(p *Plugin) error {
 		p.Config.CommitterListGitPath = os.Getenv("DRONE_WORKSPACE")
 	}
 
-	emails, err := GetChangesetAuthorsList(p.Config.RecentCommitId, p.Config.OldCommitId, p.Config.CommitterListGitPath)
+	emails, err := GetChangesetAuthorsList(p.Config.CommitterListGitPath)
 	if err != nil {
 		return fmt.Errorf("failed to get git emails: %w", err)
 	}
@@ -554,7 +553,18 @@ func getSlackUserIDByEmail(accessToken, email string) (string, error) {
 	return user.ID, nil
 }
 
-func GetChangesetAuthorsList(newCommitId, oldCommitId, gitDir string) ([]string, error) {
+func GetChangesetAuthorsList(gitDir string) ([]string, error) {
+
+	newCommitId, err := GetGitRevision("HEAD", gitDir)
+	if err != nil {
+		return []string{}, fmt.Errorf("failed to get HEAD commit id: %w", err)
+	}
+
+	oldCommitId, err := GetGitRevision("HEAD^", gitDir)
+	if err != nil {
+		return []string{}, fmt.Errorf("failed to get HEAD^ commit id: %w", err)
+	}
+
 	if gitDir == "" {
 		log.Println("gitDir is empty")
 		return nil, fmt.Errorf("gitDir cannot be empty")
@@ -620,6 +630,29 @@ func getCommitIdType(input string) string {
 		return HeadWithNumber
 	}
 	return "Unknown"
+}
+
+func GetGitRevision(ref string, gitDir string) (string, error) {
+	if gitDir == "" {
+		return "", fmt.Errorf("gitDir cannot be empty")
+	}
+	if ref == "" {
+		return "", fmt.Errorf("ref cannot be empty")
+	}
+
+	cmd := exec.Command("git", "-C", gitDir, "rev-parse", ref)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+
+	err := cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf("failed to run git rev-parse: %s, error: %w", out.String(), err)
+	}
+
+	retStr := strings.ReplaceAll(out.String(), "\n", "")
+	retStr = strings.ReplaceAll(retStr, "\r", "")
+	return strings.TrimSpace(retStr), nil
 }
 
 const (

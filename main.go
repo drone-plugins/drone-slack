@@ -249,15 +249,10 @@ func main() {
 			Usage:  "git repo path holding the committers email id to fetch slack IDs from",
 			EnvVar: "PLUGIN_COMMITTER_LIST_GIT_PATH",
 		},
-		cli.StringFlag{
-			Name:   "recent_commit_id",
-			Usage:  "recent / latest commit id in the range of commits to get commit authors",
-			EnvVar: "PLUGIN_RECENT_COMMIT_ID",
-		},
-		cli.StringFlag{
-			Name:   "old_commit_id",
-			Usage:  "old commit id in the range of commits to get commit authors",
-			EnvVar: "PLUGIN_OLD_COMMIT_ID",
+		cli.BoolFlag{
+			Name:   "plugin_committer_slack_id",
+			Usage:  "flag to enable fetching slack IDs from the committers list",
+			EnvVar: "PLUGIN_COMMITTERS_SLACK_ID",
 		},
 	}
 
@@ -326,8 +321,7 @@ func run(c *cli.Context) error {
 			FailOnError:          c.Bool("fail_on_error"),
 			SlackIdOf:            c.String("slack_id_of"),
 			CommitterListGitPath: c.String("committer_list_git_path"),
-			RecentCommitId:       c.String("recent_commit_id"),
-			OldCommitId:          c.String("old_commit_id"),
+			CommitterSlackId:     c.Bool("plugin_committer_slack_id"),
 		},
 	}
 
