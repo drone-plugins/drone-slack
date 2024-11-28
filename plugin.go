@@ -501,25 +501,29 @@ func prepend(prefix, s string) string {
 }
 
 func GetSlackIdsOfCommitters(p *Plugin) error {
-	if p.Config.CommitterListGitPath == DefaultWorkspace {
+	if p.Config.CommitterListGitPath == "" {
 		p.Config.CommitterListGitPath = os.Getenv("DRONE_WORKSPACE")
 	}
+	slackIdMap := map[string]interface{}{}
 
 	emails, err := GetChangesetAuthorsList(p.Config.CommitterListGitPath)
 	if err != nil {
 		return fmt.Errorf("failed to get git emails: %w", err)
 	}
-	var slackIdsList []string
+
 	for _, email := range emails {
 		slackId, err := getSlackUserIDByEmail(p.Config.AccessToken, email)
 		if err != nil {
 			continue
 		}
-
-		slackIdsList = append(slackIdsList, slackId)
+		slackIdMap[email] = slackId
 	}
-	slackIdsListStr := strings.Join(slackIdsList, ",")
-	err = WriteEnvToOutputFile("COMMITTER_SLACK_ID_LIST", slackIdsListStr)
+
+	jsonStr, err := json.Marshal(slackIdMap)
+	if err != nil {
+		return fmt.Errorf("failed to marshal git emails to json: %w", err)
+	}
+	err = WriteEnvToOutputFile("COMMITTER_SLACK_IDS", string(jsonStr))
 	if err != nil {
 		return fmt.Errorf("failed to write git emails to output file: %w", err)
 	}
@@ -532,7 +536,7 @@ func GetSlackIdFromEmail(p *Plugin) error {
 	if err != nil {
 		return fmt.Errorf("failed to get Slack ID by email: %w", err)
 	}
-	err = WriteEnvToOutputFile("FOUND_SLACK_ID", slackId)
+	err = WriteEnvToOutputFile("SLACK_ID_FOR_EMAIL", slackId)
 	if err != nil {
 		return fmt.Errorf("failed to write Slack ID to output file: %w", err)
 	}

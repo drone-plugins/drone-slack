@@ -242,12 +242,12 @@ func main() {
 		cli.StringFlag{
 			Name:   "slack_id_of",
 			Usage:  "slack id required for the user email id",
-			EnvVar: "PLUGIN_SLACK_ID_OF",
+			EnvVar: "PLUGIN_SLACK_USER_EMAIL_ID",
 		},
 		cli.StringFlag{
 			Name:   "committer_list_git_path",
 			Usage:  "git repo path holding the committers email id to fetch slack IDs from",
-			EnvVar: "PLUGIN_COMMITTER_LIST_GIT_PATH",
+			EnvVar: "PLUGIN_GIT_REPO_PATH",
 		},
 		cli.BoolFlag{
 			Name:   "plugin_committer_slack_id",
