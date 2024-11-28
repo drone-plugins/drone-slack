@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 	textTemplate "text/template"
 
@@ -83,6 +82,8 @@ type (
 		SlackIdOf string
 		// Git path to get list of committer emails
 		CommitterListGitPath string
+		RecentCommitId       string
+		OldCommitId          string
 	}
 
 	Job struct {
@@ -502,7 +503,11 @@ func GetSlackIdsOfCommitters(p *Plugin) error {
 		p.Config.CommitterListGitPath = os.Getenv("DRONE_WORKSPACE")
 	}
 
-	emails, err := getGitEmails(p.Config.CommitterListGitPath)
+	emails, err := GetChangesetAuthorsList(p.Config.RecentCommitId, p.Config.OldCommitId, p.Config.CommitterListGitPath)
+	for _, email := range emails {
+		fmt.Println("Email: ", email)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to get git emails: %w", err)
 	}
@@ -551,42 +556,59 @@ func getSlackUserIDByEmail(accessToken, email string) (string, error) {
 	return user.ID, nil
 }
 
-func getGitCommittersCommand(dir string) *exec.Cmd {
-	if runtime.GOOS == "windows" {
-		gitLogCmd := "git log --format='%ae' | Sort-Object | Get-Unique"
-		return exec.Command("powershell", "-Command", gitLogCmd)
+func GetChangesetAuthorsList(newCommitId, oldCommitId, gitDir string) ([]string, error) {
+	fmt.Println("newCommitId: ", newCommitId)
+	fmt.Println("oldCommitId: ", oldCommitId)
+	fmt.Println("gitDir: ", gitDir)
+	if gitDir == "" {
+		fmt.Println("gitDir is empty")
+		return nil, fmt.Errorf("gitDir cannot be empty")
 	}
-	return exec.Command("bash", "-c", "set -e; git log --format='%ae' | sort | uniq")
-}
+	if newCommitId != "HEAD" && len(newCommitId) == 0 {
+		return nil, fmt.Errorf("newCommitId cannot be empty")
+	}
+	if newCommitId == "HEAD" {
+		if _, err := fmt.Sscanf(oldCommitId, "%d", &struct{}{}); err != nil {
+			return nil, fmt.Errorf("oldCommitId must be a valid number when newCommitId is HEAD")
+		}
+	}
 
-func getGitEmails(dir string) ([]string, error) {
-	var emailList []string
+	var commitRange string
+	if newCommitId == "HEAD" {
+		commitRange = fmt.Sprintf("HEAD~%s..HEAD", oldCommitId)
+	} else {
+		commitRange = fmt.Sprintf("%s..%s", oldCommitId, newCommitId)
+	}
 
-	cmd := getGitCommittersCommand(dir)
-	cmd.Dir = dir
+	absGitDir, err := filepath.Abs(gitDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get absolute path of gitDir: %w", err)
+	}
 
+	cmd := exec.Command("git", "-C", absGitDir, "log", "--format=%ae", commitRange)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
 
-	if err := cmd.Run(); err != nil {
-		fmt.Println("Error: ", err)
-		return emailList, fmt.Errorf("failed to execute git command: %v\nOutput: %s", err, out.String())
+	err = cmd.Run()
+	if err != nil {
+		return nil, fmt.Errorf("failed to run git log command: %s", out.String())
 	}
 
-	return cleanupAndSplitEmails(out.String()), nil
-}
-
-func cleanupAndSplitEmails(emailString string) []string {
-	lines := strings.Fields(emailString)
-	var cleanedEmails []string
-	for _, line := range lines {
-		email := strings.TrimSpace(line)
-		if email != "" {
-			cleanedEmails = append(cleanedEmails, email)
+	emailLines := strings.Split(out.String(), "\n")
+	emailSet := make(map[string]struct{})
+	for _, email := range emailLines {
+		if strings.TrimSpace(email) != "" {
+			emailSet[email] = struct{}{}
 		}
 	}
-	return cleanedEmails
+
+	var uniqueEmails []string
+	for email := range emailSet {
+		uniqueEmails = append(uniqueEmails, email)
+	}
+
+	return uniqueEmails, nil
 }
 
 const (
