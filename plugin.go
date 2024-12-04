@@ -504,26 +504,21 @@ func GetSlackIdsOfCommitters(p *Plugin) error {
 	if p.Config.CommitterListGitPath == "" {
 		p.Config.CommitterListGitPath = os.Getenv("DRONE_WORKSPACE")
 	}
-	slackIdMap := map[string]interface{}{}
 
 	emails, err := GetChangesetAuthorsList(p.Config.CommitterListGitPath)
 	if err != nil {
+		fmt.Println("Failed to get git emails: ", err)
 		return fmt.Errorf("failed to get git emails: %w", err)
 	}
 
-	for _, email := range emails {
-		slackId, err := getSlackUserIDByEmail(p.Config.AccessToken, email)
-		if err != nil {
-			continue
-		}
-		slackIdMap[email] = slackId
+	slackUserIdList, err := getSlackUserIDByEmail(p.Config.AccessToken, strings.Join(emails, ","))
+	if err != nil {
+		fmt.Println("Failed to get Slack ID by email: ", err)
+		return fmt.Errorf("failed to get Slack ID by email: %w", err)
 	}
 
-	jsonStr, err := json.Marshal(slackIdMap)
-	if err != nil {
-		return fmt.Errorf("failed to marshal git emails to json: %w", err)
-	}
-	err = WriteEnvToOutputFile("COMMITTER_SLACK_IDS", string(jsonStr))
+	jsonStr := strings.Join(slackUserIdList, ",")
+	err = WriteEnvToOutputFile("COMMITTERS_SLACK_IDS", jsonStr)
 	if err != nil {
 		return fmt.Errorf("failed to write git emails to output file: %w", err)
 	}
@@ -532,29 +527,68 @@ func GetSlackIdsOfCommitters(p *Plugin) error {
 
 func GetSlackIdFromEmail(p *Plugin) error {
 
-	slackId, err := getSlackUserIDByEmail(p.Config.AccessToken, p.Config.SlackIdOf)
+	slackIdList, err := getSlackUserIDByEmail(p.Config.AccessToken, p.Config.SlackIdOf)
 	if err != nil {
+		log.Println("Failed to get Slack ID by email: ", err)
 		return fmt.Errorf("failed to get Slack ID by email: %w", err)
 	}
-	err = WriteEnvToOutputFile("SLACK_ID_FOR_EMAIL", slackId)
+
+	slackIdsCsvStr := strings.Join(slackIdList, ",")
+	err = WriteEnvToOutputFile("SLACK_ID_FROM_EMAIL", slackIdsCsvStr)
 	if err != nil {
 		return fmt.Errorf("failed to write Slack ID to output file: %w", err)
 	}
 	return nil
 }
 
-func getSlackUserIDByEmail(accessToken, email string) (string, error) {
-	api := slack.New(accessToken)
-	if api == nil {
-		return "", fmt.Errorf("failed to create Slack client")
+func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
+
+	emailArray := []string{}
+	for _, email := range strings.Split(emailListStr, ",") {
+		trimmedEmail := strings.TrimSpace(email)
+		if trimmedEmail != "" {
+			emailArray = append(emailArray, trimmedEmail)
+		}
+	}
+	slackIdsList := []string{}
+
+	for _, email := range emailArray {
+		api := slack.New(accessToken)
+		if api == nil {
+			return emailArray, fmt.Errorf("failed to create Slack client")
+		}
+
+		user, err := api.GetUserByEmail(email)
+		if err != nil {
+			//return emailArray, fmt.Errorf("failed to get user by email: %w", err)
+			continue
+		}
+		slackIdsList = append(slackIdsList, user.ID)
 	}
 
-	user, err := api.GetUserByEmail(email)
+	return slackIdsList, nil
+}
+
+func sendDirectMessage(botToken, userID string) error {
+
+	client := slack.New(botToken)
+
+	channel, _, _, err := client.OpenConversation(&slack.OpenConversationParameters{
+		ReturnIM: true,
+		Users:    []string{userID},
+	})
 	if err != nil {
-		return "", fmt.Errorf("failed to get user by email: %w", err)
+		log.Println("Failed to open conversation: ", err)
 	}
 
-	return user.ID, nil
+	message := "Hello, this is a message from your friendly bot!"
+	_, _, err = client.PostMessage(channel.ID, slack.MsgOptionText(message, false))
+	if err != nil {
+		log.Printf("Failed to send direct slack message: %v", err)
+	}
+
+	fmt.Printf("Message sent to user %s in channel %s\n", userID, channel.ID)
+	return nil
 }
 
 func GetChangesetAuthorsList(gitDir string) ([]string, error) {
