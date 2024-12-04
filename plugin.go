@@ -305,19 +305,9 @@ func (p Plugin) Exec() error {
 		}
 
 		if p.Config.CommitterSlackId {
-			slackUserIdList, err := GetSlackIdsOfCommitters(&p)
+			err := p.sendDirectMessageToCommitters(options)
 			if err != nil {
-				fmt.Println("Failed to get Slack ID by email: ", err)
-				return fmt.Errorf("failed to get Slack ID by email: %w", err)
-			}
-			for _, slackUserId := range slackUserIdList {
-				err = sendDirectMessage(p.Config.AccessToken, slackUserId)
-				if err != nil {
-					fmt.Println("Failed to send direct message: ", err)
-					//return fmt.Errorf("failed to send direct message: %w", err)
-					continue
-				}
-				fmt.Println("Message sent successfully for ", slackUserId)
+				return fmt.Errorf("failed to send direct message to committers: %w", err)
 			}
 		}
 
@@ -579,7 +569,6 @@ func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
 
 		user, err := api.GetUserByEmail(email)
 		if err != nil {
-			//return emailArray, fmt.Errorf("failed to get user by email: %w", err)
 			continue
 		}
 		slackIdsList = append(slackIdsList, user.ID)
@@ -588,7 +577,24 @@ func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
 	return slackIdsList, nil
 }
 
-func sendDirectMessage(botToken, userID string) error {
+func (p Plugin) sendDirectMessageToCommitters(options []slack.MsgOption) error {
+	slackUserIdList, err := GetSlackIdsOfCommitters(&p)
+	if err != nil {
+		fmt.Println("Failed to get Slack ID by email: ", err)
+		return fmt.Errorf("failed to get Slack ID by email: %w", err)
+	}
+	for _, slackUserId := range slackUserIdList {
+		err = sendDirectMessage(p.Config.AccessToken, slackUserId, options)
+		if err != nil {
+			fmt.Println("Failed to send direct message: ", err)
+			continue
+		}
+		fmt.Println("Message sent successfully for ", slackUserId)
+	}
+	return nil
+}
+
+func sendDirectMessage(botToken, userID string, options []slack.MsgOption) error {
 
 	client := slack.New(botToken)
 
@@ -600,13 +606,11 @@ func sendDirectMessage(botToken, userID string) error {
 		log.Println("Failed to open conversation: ", err)
 	}
 
-	message := "Division Bell"
-	_, _, err = client.PostMessage(channel.ID, slack.MsgOptionText(message, false))
+	_, _, err = client.PostMessage(channel.ID, options...)
 	if err != nil {
 		log.Printf("Failed to send direct slack message: %v", err)
 	}
 
-	fmt.Printf("Message sent to user %s in channel %s\n", userID, channel.ID)
 	return nil
 }
 
