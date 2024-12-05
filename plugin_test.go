@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -216,4 +218,74 @@ func TestFileUpload(t *testing.T) {
 	plugin.Config.Webhook = server.URL
 
 	_ = plugin.Exec()
+}
+
+func TestGetSlackIdFromEmail(t *testing.T) {
+	// Mock configuration
+	config := Config{
+		AccessToken: "test-access-token",
+		SlackIdOf:   "octocat@github.com",
+	}
+
+	// Mock plugin
+	plugin := Plugin{
+		Config: config,
+	}
+
+	// Mock Slack server response
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{
+			"user": {
+				"id": "U12345",
+				"name": "octocat"
+			}
+		}`
+		_, _ = w.Write([]byte(response))
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	// Set mock Slack API endpoint
+	plugin.Config.AccessToken = server.URL
+
+	// Test GetSlackIdFromEmail
+	err := GetSlackIdFromEmail(&plugin)
+	assert.NilError(t, err, "should retrieve Slack ID without error")
+}
+
+func TestGetSlackIdsOfCommitters(t *testing.T) {
+	config := Config{
+		AccessToken:          "mock-access-token",
+		CommitterListGitPath: "/mock/repo/path",
+	}
+
+	plugin := Plugin{Config: config}
+
+	mockGetAuthorsList := func(gitDir string) ([]string, error) {
+		return []string{"user1@example.com", "user2@example.com"}, nil
+	}
+
+	mockGetSlackUserIDByEmail := func(accessToken string, emailList string) ([]string, error) {
+		emails := strings.Split(emailList, ",")
+		emailToID := map[string]string{
+			"user1@example.com": "U12345",
+			"user2@example.com": "U67890",
+		}
+
+		var ids []string
+		for _, email := range emails {
+			id, ok := emailToID[email]
+			if !ok {
+				return nil, fmt.Errorf("invalid_auth")
+			}
+			ids = append(ids, id)
+		}
+		return ids, nil
+	}
+
+	slackIDs, err := GetSlackIdsOfCommitters(&plugin, mockGetAuthorsList, mockGetSlackUserIDByEmail)
+	assert.NilError(t, err, "should retrieve Slack IDs without error")
+	assert.DeepEqual(t, slackIDs, []string{"U12345", "U67890"})
 }

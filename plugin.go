@@ -7,10 +7,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
 	textTemplate "text/template"
 
@@ -108,9 +105,6 @@ func (a Author) String() string {
 }
 
 func newCommitMessage(m string) Message {
-	// not checking the length here
-	// as split will always return at least one element
-	// check it if using more than the first element
 	splitMsg := strings.Split(m, "\n")
 
 	return Message{
@@ -139,7 +133,7 @@ func (p Plugin) Exec() error {
 	}
 
 	if p.Config.CommitterSlackId && p.Config.Channel == "" {
-		_, err := GetSlackIdsOfCommitters(&p)
+		_, err := GetSlackIdsOfCommitters(&p, GetChangesetAuthorsList, getSlackUserIDByEmail)
 		return err
 	}
 
@@ -511,19 +505,21 @@ func prepend(prefix, s string) string {
 	return s
 }
 
-func GetSlackIdsOfCommitters(p *Plugin) ([]string, error) {
+func GetSlackIdsOfCommitters(p *Plugin,
+	getAuthorsListFunc func(string) ([]string, error),
+	getSlackUserIDByEmailFunc func(string, string) ([]string, error)) ([]string, error) {
+
 	if p.Config.CommitterListGitPath == "" {
 		p.Config.CommitterListGitPath = os.Getenv("DRONE_WORKSPACE")
 	}
 
-	// emails, err := GetChangesetAuthorsList(p.Config.CommitterListGitPath)
-	emails, err := GoGetChangesetAuthorsList(p.Config.CommitterListGitPath)
+	emails, err := getAuthorsListFunc(p.Config.CommitterListGitPath)
 	if err != nil {
 		log.Println("Failed to get git emails: ", err)
 		return []string{}, fmt.Errorf("failed to get git emails: %w", err)
 	}
 
-	slackUserIdList, err := getSlackUserIDByEmail(p.Config.AccessToken, strings.Join(emails, ","))
+	slackUserIdList, err := getSlackUserIDByEmailFunc(p.Config.AccessToken, strings.Join(emails, ","))
 	if err != nil {
 		log.Println("Failed to get Slack ID by email: ", err)
 		return []string{}, fmt.Errorf("failed to get Slack ID by email: %w", err)
@@ -535,6 +531,7 @@ func GetSlackIdsOfCommitters(p *Plugin) ([]string, error) {
 		log.Println("Failed to write git emails to output file: ", err)
 		return []string{}, fmt.Errorf("failed to write git emails to output file: %w", err)
 	}
+
 	return slackUserIdList, nil
 }
 
@@ -583,7 +580,7 @@ func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
 }
 
 func (p Plugin) sendDirectMessageToCommitters(options []slack.MsgOption) error {
-	slackUserIdList, err := GetSlackIdsOfCommitters(&p)
+	slackUserIdList, err := GetSlackIdsOfCommitters(&p, GetChangesetAuthorsList, getSlackUserIDByEmail)
 	if err != nil {
 		log.Println("Failed to get Slack ID by email: ", err)
 		return fmt.Errorf("failed to get Slack ID by email: %w", err)
@@ -619,7 +616,7 @@ func sendDirectMessage(botToken, userID string, options []slack.MsgOption) error
 	return nil
 }
 
-func GoGetChangesetAuthorsList(gitDir string) ([]string, error) {
+func GetChangesetAuthorsList(gitDir string) ([]string, error) {
 	fmt.Println("GoGetChangesetAuthorsList v12")
 	if gitDir == "" {
 		log.Println("gitDir is empty")
@@ -685,57 +682,3 @@ func GoGetChangesetAuthorsList(gitDir string) ([]string, error) {
 	}
 	return uniqueEmails, nil
 }
-
-func getCommitRange(oldCommitId, newCommitId string) string {
-	var commitRange string
-	commitRange = fmt.Sprintf("%s..%s", oldCommitId, newCommitId)
-
-	if newCommitId == "HEAD" {
-		switch getCommitIdType(oldCommitId) {
-		case HeadWithNumber:
-			commitRange = fmt.Sprintf("HEAD~%s..HEAD", oldCommitId)
-		case HeadWithShaId:
-			commitRange = fmt.Sprintf("%s..HEAD", oldCommitId)
-		}
-	}
-	return commitRange
-}
-
-func getCommitIdType(input string) string {
-	shaRegex := regexp.MustCompile(`^[a-fA-F0-9]{40}$`)
-	if shaRegex.MatchString(input) {
-		return HeadWithShaId
-	}
-	if _, err := strconv.Atoi(input); err == nil {
-		return HeadWithNumber
-	}
-	return "Unknown"
-}
-
-func GetGitRevision(ref string, gitDir string) (string, error) {
-	if gitDir == "" {
-		return "", fmt.Errorf("gitDir cannot be empty")
-	}
-	if ref == "" {
-		return "", fmt.Errorf("ref cannot be empty")
-	}
-
-	cmd := exec.Command("git", "-C", gitDir, "rev-parse", ref)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &out
-
-	err := cmd.Run()
-	if err != nil {
-		return "", fmt.Errorf("failed to run git rev-parse: %s, error: %w", out.String(), err)
-	}
-
-	retStr := strings.ReplaceAll(out.String(), "\n", "")
-	retStr = strings.ReplaceAll(retStr, "\r", "")
-	return strings.TrimSpace(retStr), nil
-}
-
-const (
-	HeadWithNumber = "HeadWithNumber"
-	HeadWithShaId  = "HeadWithShaId"
-)
