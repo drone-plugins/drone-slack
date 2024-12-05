@@ -5,7 +5,5 @@ LABEL maintainer="Drone.IO Community <drone-dev@googlegroups.com>" \
   org.label-schema.vendor="Drone.IO Community" \
   org.label-schema.schema-version="1.0"
 
-RUN apk add --no-cache git bash
-
 ADD release/linux/amd64/drone-slack /bin/
 ENTRYPOINT ["/bin/drone-slack"]
