@@ -535,7 +535,6 @@ func GetSlackIdsOfCommitters(p *Plugin) ([]string, error) {
 }
 
 func GetSlackIdFromEmail(p *Plugin) error {
-
 	slackIdList, err := getSlackUserIDByEmail(p.Config.AccessToken, p.Config.SlackIdOf)
 	if err != nil {
 		log.Println("Failed to get Slack ID by email: ", err)
@@ -564,11 +563,13 @@ func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
 	for _, email := range emailArray {
 		api := slack.New(accessToken)
 		if api == nil {
+			fmt.Println("Failed to create Slack client")
 			return emailArray, fmt.Errorf("failed to create Slack client")
 		}
 
 		user, err := api.GetUserByEmail(email)
 		if err != nil {
+			fmt.Println("Failed to get Slack ID by email: ", err, " for email: ", email)
 			continue
 		}
 		slackIdsList = append(slackIdsList, user.ID)
@@ -721,7 +722,6 @@ func GetGitRevision(ref string, gitDir string) (string, error) {
 }
 
 const (
-	DefaultWorkspace = "DRONE_WORKSPACE"
-	HeadWithNumber   = "HeadWithNumber"
-	HeadWithShaId    = "HeadWithShaId"
+	HeadWithNumber = "HeadWithNumber"
+	HeadWithShaId  = "HeadWithShaId"
 )
