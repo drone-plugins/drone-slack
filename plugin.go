@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"log"
 	"os"
 	"os/exec"
@@ -15,6 +16,8 @@ import (
 
 	"github.com/drone/drone-template-lib/template"
 	"github.com/slack-go/slack"
+
+	"github.com/go-git/go-git/v5"
 )
 
 type (
@@ -513,7 +516,8 @@ func GetSlackIdsOfCommitters(p *Plugin) ([]string, error) {
 		p.Config.CommitterListGitPath = os.Getenv("DRONE_WORKSPACE")
 	}
 
-	emails, err := GetChangesetAuthorsList(p.Config.CommitterListGitPath)
+	// emails, err := GetChangesetAuthorsList(p.Config.CommitterListGitPath)
+	emails, err := GoGetChangesetAuthorsList(p.Config.CommitterListGitPath)
 	if err != nil {
 		log.Println("Failed to get git emails: ", err)
 		return []string{}, fmt.Errorf("failed to get git emails: %w", err)
@@ -615,24 +619,11 @@ func sendDirectMessage(botToken, userID string, options []slack.MsgOption) error
 	return nil
 }
 
-func GetChangesetAuthorsList(gitDir string) ([]string, error) {
-
-	newCommitId, err := GetGitRevision("HEAD", gitDir)
-	if err != nil {
-		return []string{}, fmt.Errorf("failed to get HEAD commit id: %w", err)
-	}
-
-	oldCommitId, err := GetGitRevision("HEAD^", gitDir)
-	if err != nil {
-		return []string{}, fmt.Errorf("failed to get HEAD^ commit id: %w", err)
-	}
-
+func GoGetChangesetAuthorsList(gitDir string) ([]string, error) {
+	fmt.Println("GoGetChangesetAuthorsList v12")
 	if gitDir == "" {
 		log.Println("gitDir is empty")
 		return nil, fmt.Errorf("gitDir cannot be empty")
-	}
-	if newCommitId != "HEAD" && len(newCommitId) == 0 {
-		return nil, fmt.Errorf("newCommitId cannot be empty")
 	}
 
 	absGitDir, err := filepath.Abs(gitDir)
@@ -641,34 +632,57 @@ func GetChangesetAuthorsList(gitDir string) ([]string, error) {
 		return nil, fmt.Errorf("failed to get absolute path of gitDir: %w", err)
 	}
 
-	commitRange := getCommitRange(oldCommitId, newCommitId)
-	cmd := exec.Command("git", "-C", absGitDir, "log", "--format=%ae", commitRange)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &out
-
-	err = cmd.Run()
+	repo, err := git.PlainOpen(absGitDir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to run git log command: %s", out.String())
+		return nil, fmt.Errorf("failed to open git repository: %w", err)
 	}
 
-	emailLines := strings.Split(out.String(), "\n")
-	if len(emailLines) == 0 {
-		return nil, fmt.Errorf("Unable to get email from git log")
+	headRef, err := repo.Head()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get HEAD reference: %w", err)
+	}
+
+	headCommit, err := repo.CommitObject(headRef.Hash())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get HEAD commit: %w", err)
+	}
+
+	parentCommitIter := headCommit.Parents()
+	oldCommit, err := parentCommitIter.Next()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get parent commit of HEAD: %w", err)
 	}
 
 	emailSet := make(map[string]struct{})
-	for _, email := range emailLines {
-		if strings.TrimSpace(email) != "" {
+
+	commitIter, err := repo.Log(&git.LogOptions{
+		From:  headCommit.Hash,
+		Order: git.LogOrderCommitterTime,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get commit log: %w", err)
+	}
+
+	err = commitIter.ForEach(func(commit *object.Commit) error {
+		// Stop if we reach the parent commit
+		if commit.Hash == oldCommit.Hash {
+			return nil
+		}
+
+		email := strings.TrimSpace(commit.Author.Email)
+		if email != "" {
 			emailSet[email] = struct{}{}
 		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error during commit log iteration: %w", err)
 	}
 
 	var uniqueEmails []string
 	for email := range emailSet {
 		uniqueEmails = append(uniqueEmails, email)
 	}
-
 	return uniqueEmails, nil
 }
 
