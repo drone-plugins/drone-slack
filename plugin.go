@@ -515,20 +515,20 @@ func GetSlackIdsOfCommitters(p *Plugin) ([]string, error) {
 
 	emails, err := GetChangesetAuthorsList(p.Config.CommitterListGitPath)
 	if err != nil {
-		fmt.Println("Failed to get git emails: ", err)
+		log.Println("Failed to get git emails: ", err)
 		return []string{}, fmt.Errorf("failed to get git emails: %w", err)
 	}
 
 	slackUserIdList, err := getSlackUserIDByEmail(p.Config.AccessToken, strings.Join(emails, ","))
 	if err != nil {
-		fmt.Println("Failed to get Slack ID by email: ", err)
+		log.Println("Failed to get Slack ID by email: ", err)
 		return []string{}, fmt.Errorf("failed to get Slack ID by email: %w", err)
 	}
 
 	jsonStr := strings.Join(slackUserIdList, ",")
 	err = WriteEnvToOutputFile("COMMITTERS_SLACK_IDS", jsonStr)
 	if err != nil {
-		fmt.Println("Failed to write git emails to output file: ", err)
+		log.Println("Failed to write git emails to output file: ", err)
 		return []string{}, fmt.Errorf("failed to write git emails to output file: %w", err)
 	}
 	return slackUserIdList, nil
@@ -563,13 +563,13 @@ func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
 	for _, email := range emailArray {
 		api := slack.New(accessToken)
 		if api == nil {
-			fmt.Println("Failed to create Slack client")
+			log.Println("Failed to create Slack client")
 			return emailArray, fmt.Errorf("failed to create Slack client")
 		}
 
 		user, err := api.GetUserByEmail(email)
 		if err != nil {
-			fmt.Println("Failed to get Slack ID by email: ", err, " for email: ", email)
+			log.Println("Failed to get Slack ID by email: ", err, " for email: ", email)
 			continue
 		}
 		slackIdsList = append(slackIdsList, user.ID)
@@ -581,16 +581,16 @@ func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
 func (p Plugin) sendDirectMessageToCommitters(options []slack.MsgOption) error {
 	slackUserIdList, err := GetSlackIdsOfCommitters(&p)
 	if err != nil {
-		fmt.Println("Failed to get Slack ID by email: ", err)
+		log.Println("Failed to get Slack ID by email: ", err)
 		return fmt.Errorf("failed to get Slack ID by email: %w", err)
 	}
 	for _, slackUserId := range slackUserIdList {
 		err = sendDirectMessage(p.Config.AccessToken, slackUserId, options)
 		if err != nil {
-			fmt.Println("Failed to send direct message: ", err)
+			log.Println("Failed to send direct message: ", err)
 			continue
 		}
-		fmt.Println("Message sent successfully for ", slackUserId)
+		log.Println("Message sent successfully for ", slackUserId)
 	}
 	return nil
 }
