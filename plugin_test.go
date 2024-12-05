@@ -221,18 +221,15 @@ func TestFileUpload(t *testing.T) {
 }
 
 func TestGetSlackIdFromEmail(t *testing.T) {
-	// Mock configuration
 	config := Config{
 		AccessToken: "test-access-token",
 		SlackIdOf:   "octocat@github.com",
 	}
 
-	// Mock plugin
 	plugin := Plugin{
 		Config: config,
 	}
 
-	// Mock Slack server response
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		response := `{
@@ -247,10 +244,8 @@ func TestGetSlackIdFromEmail(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
-	// Set mock Slack API endpoint
 	plugin.Config.AccessToken = server.URL
 
-	// Test GetSlackIdFromEmail
 	err := GetSlackIdFromEmail(&plugin)
 	assert.NilError(t, err, "should retrieve Slack ID without error")
 }

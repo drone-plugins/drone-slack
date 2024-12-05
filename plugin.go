@@ -617,7 +617,6 @@ func sendDirectMessage(botToken, userID string, options []slack.MsgOption) error
 }
 
 func GetChangesetAuthorsList(gitDir string) ([]string, error) {
-	fmt.Println("GoGetChangesetAuthorsList v12")
 	if gitDir == "" {
 		log.Println("gitDir is empty")
 		return nil, fmt.Errorf("gitDir cannot be empty")
