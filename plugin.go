@@ -574,6 +574,9 @@ func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
 			continue
 		}
 		slackIdsList = append(slackIdsList, user.ID)
+		
+		// Add a short delay to avoid rate limits
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	return slackIdsList, nil
