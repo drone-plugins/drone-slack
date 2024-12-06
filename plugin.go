@@ -580,6 +580,9 @@ func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
 		// Add a short delay to avoid rate limits
 		time.Sleep(500 * time.Millisecond)
 	}
+	if len(failedEmails) > 0 {
+                log.Printf("Failed to fetch Slack IDs for the following emails: %v", failedEmails)
+        }
 
 	return slackIdsList, nil
 }
