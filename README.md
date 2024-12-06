@@ -88,6 +88,49 @@ Make sure to replace `your_access_token` with your actual Slack access token and
 If you provide an access token, it will use the Slack API to send the message.
 
 
+### Get Slack Id of a user from a Email ID
+```bash
+docker run --network host --rm \
+-e PLUGIN_ACCESS_TOKEN=your_access_token \
+-e PLUGIN_SLACK_ID_OF=user01@somedomain.com \
+plugins/slack
+```
+Output will be stored in the FOUND_SLACK_ID environment variable
+Make sure to replace `your_access_token` with your actual Slack access token and adjust
+
+### Get the Slack IDs of all committers from a git repo with two commit ids as commit Ids
+```bash
+docker run --network host --rm \
+-e PLUGIN_ACCESS_TOKEN=your_access_token \
+-e PLUGIN_COMMITTER_LIST_GIT_PATH=/harness \
+-e PLUGIN_RECENT_COMMIT_ID=7fd1a60b01f91b314f59955a4e4d4e80d8edf11d \
+-e PLUGIN_OLD_COMMIT_ID=7fd1a60b01f91b314f59955a4e4d4e80d8edf11d \
+plugins/slack
+```
+
+### Get the Slack IDs of all committers from a git repo with HEAD and a commit id
+```bash
+docker run --network host --rm \
+-e PLUGIN_ACCESS_TOKEN=your_access_token \
+-e PLUGIN_COMMITTER_LIST_GIT_PATH=/harness \
+-e PLUGIN_RECENT_COMMIT_ID=HEAD \
+-e PLUGIN_OLD_COMMIT_ID=7fd1a60b01f91b314f59955a4e4d4e80d8edf11d \
+plugins/slack
+```
+
+### Get the Slack IDs of all committers from a git repo with HEAD and a number of commits behind HEAD
+```bash
+docker run --network host --rm \
+-e PLUGIN_ACCESS_TOKEN=your_access_token \
+-e PLUGIN_COMMITTER_LIST_GIT_PATH=/harness \
+-e PLUGIN_RECENT_COMMIT_ID=HEAD \
+-e PLUGIN_OLD_COMMIT_ID=5 \
+plugins/slack
+```
+
+Output will be stored in the COMMITTER_SLACK_ID_LIST environment variable as comma separated values.
+Make sure to replace `your_access_token` with your actual Slack access token and adjust.
+
 ## Release Preparation
 
 Run the changelog generator.

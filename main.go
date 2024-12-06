@@ -3,11 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
-	"os"
-
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli"
+	"log"
+	"os"
 )
 
 var (
@@ -16,6 +15,7 @@ var (
 )
 
 func main() {
+
 	app := cli.NewApp()
 	app.Name = "slack plugin"
 	app.Usage = "slack plugin"
@@ -239,6 +239,21 @@ func main() {
 			Usage:  "fail build on error",
 			EnvVar: "PLUGIN_FAIL_ON_ERROR",
 		},
+		cli.StringFlag{
+			Name:   "slack_id_of",
+			Usage:  "slack id required for the user email id",
+			EnvVar: "PLUGIN_SLACK_USER_EMAIL_ID",
+		},
+		cli.StringFlag{
+			Name:   "committer_list_git_path",
+			Usage:  "git repo path holding the committers email id to fetch slack IDs from",
+			EnvVar: "PLUGIN_GIT_REPO_PATH",
+		},
+		cli.BoolFlag{
+			Name:   "plugin_committer_slack_id",
+			Usage:  "flag to enable fetching slack IDs from the committers list",
+			EnvVar: "PLUGIN_COMMITTERS_SLACK_ID",
+		},
 	}
 
 	if _, err := os.Stat("/run/drone/env"); err == nil {
@@ -299,11 +314,14 @@ func run(c *cli.Context) error {
 			CustomTemplate: c.String("custom.template"),
 			Message:        c.String("message"),
 			// File upload attributes
-			FilePath:       c.String("filepath"),
-			FileName:       c.String("filename"),
-			Title:          c.String("title"),
-			InitialComment: c.String("initial_comment"),
-			FailOnError:    c.Bool("fail_on_error"),
+			FilePath:             c.String("filepath"),
+			FileName:             c.String("filename"),
+			Title:                c.String("title"),
+			InitialComment:       c.String("initial_comment"),
+			FailOnError:          c.Bool("fail_on_error"),
+			SlackIdOf:            c.String("slack_id_of"),
+			CommitterListGitPath: c.String("committer_list_git_path"),
+			CommitterSlackId:     c.Bool("plugin_committer_slack_id"),
 		},
 	}
 
