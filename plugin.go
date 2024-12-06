@@ -561,6 +561,7 @@ func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
 	}
 	slackIdsList := []string{}
 
+	var failedEmails []string
 	for _, email := range emailArray {
 		api := slack.New(accessToken)
 		if api == nil {
