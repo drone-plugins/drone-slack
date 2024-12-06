@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	textTemplate "text/template"
+	"time"
 
 	"github.com/drone/drone-template-lib/template"
 	"github.com/slack-go/slack"
@@ -576,13 +577,13 @@ func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
 			continue
 		}
 		slackIdsList = append(slackIdsList, user.ID)
-		
+
 		// Add a short delay to avoid rate limits
 		time.Sleep(500 * time.Millisecond)
 	}
 	if len(failedEmails) > 0 {
-                log.Printf("Failed to fetch Slack IDs for the following emails: %v", failedEmails)
-        }
+		log.Printf("Failed to fetch Slack IDs for the following emails: %v", failedEmails)
+	}
 
 	return slackIdsList, nil
 }
