@@ -572,6 +572,7 @@ func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
 		user, err := api.GetUserByEmail(email)
 		if err != nil {
 			log.Printf("Failed to fetch Slack ID for email %s: %v", email, err)
+			failedEmails = append(failedEmails, email)
 			continue
 		}
 		slackIdsList = append(slackIdsList, user.ID)
