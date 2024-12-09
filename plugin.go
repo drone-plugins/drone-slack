@@ -4,13 +4,18 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/go-git/go-git/v5/plumbing/object"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	textTemplate "text/template"
+	"time"
 
 	"github.com/drone/drone-template-lib/template"
 	"github.com/slack-go/slack"
+
+	"github.com/go-git/go-git/v5"
 )
 
 type (
@@ -77,6 +82,11 @@ type (
 		InitialComment string
 		Title          string
 		FailOnError    bool
+		// Get Slack ID of the user by email
+		SlackIdOf string
+		// Git path to get list of committer emails
+		CommitterListGitPath string
+		CommitterSlackId     bool
 	}
 
 	Job struct {
@@ -96,9 +106,6 @@ func (a Author) String() string {
 }
 
 func newCommitMessage(m string) Message {
-	// not checking the length here
-	// as split will always return at least one element
-	// check it if using more than the first element
 	splitMsg := strings.Split(m, "\n")
 
 	return Message{
@@ -120,6 +127,15 @@ func (p Plugin) Exec() error {
 
 	if p.Config.FilePath != "" {
 		return p.UploadFile()
+	}
+
+	if p.Config.SlackIdOf != "" {
+		return GetSlackIdFromEmail(&p)
+	}
+
+	if p.Config.CommitterSlackId && p.Config.Channel == "" {
+		_, err := GetSlackIdsOfCommitters(&p, GetChangesetAuthorsList, getSlackUserIDByEmail)
+		return err
 	}
 
 	// Determine the channel
@@ -157,7 +173,6 @@ func (p Plugin) Exec() error {
 		mentionText := strings.Join(mentions, " ")
 		text = fmt.Sprintf("%s %s", mentionText, text)
 	}
-
 	if p.Config.CustomTemplate != "" {
 		// Read JSON from file
 		var filePath string
@@ -286,6 +301,14 @@ func (p Plugin) Exec() error {
 		if err != nil {
 			return fmt.Errorf("failed to post message using access token: %w", err)
 		}
+
+		if p.Config.CommitterSlackId {
+			err := p.sendDirectMessageToCommitters(options)
+			if err != nil {
+				return fmt.Errorf("failed to send direct message to committers: %w", err)
+			}
+		}
+
 		return nil
 	}
 
@@ -325,7 +348,7 @@ func (p Plugin) UploadFile() error {
 	api := slack.New(p.Config.AccessToken)
 	fileSize, err := GetFileSize(p.Config.FilePath)
 	if err != nil {
-		fmt.Printf("Error getting file size: %s\n", err.Error())
+		log.Printf("Error getting file size: %s\n", err.Error())
 		return err
 	}
 
@@ -347,22 +370,22 @@ func (p Plugin) UploadFile() error {
 
 	if !p.Config.FailOnError && slackSummary == nil {
 		if err != nil {
-			fmt.Println("Bad Api ret val, upload file failed but passing build as PLUGIN_FAIL_ON_ERROR is false")
+			log.Println("Bad Api ret val, upload file failed but passing build as PLUGIN_FAIL_ON_ERROR is false")
 		}
 		return nil
 	} else if p.Config.FailOnError && slackSummary == nil {
-		fmt.Println("Bad ret val,  Failed to upload file, failing build")
+		log.Println("Bad ret val,  Failed to upload file, failing build")
 		_ = p.WriteFileUploadResult("", "", err)
 		return fmt.Errorf("Bad ret val, Failed to upload file %s ", p.Config.FilePath)
 	}
 
 	if !p.Config.FailOnError && err != nil {
 		if err != nil {
-			fmt.Println("Unable to upload file but passing build PLUGIN_FAIL_ON_ERROR is false")
+			log.Println("Unable to upload file but passing build PLUGIN_FAIL_ON_ERROR is false")
 		}
 		return nil
 	} else if p.Config.FailOnError && err != nil {
-		fmt.Println("Upload API Failed to upload file, failing build")
+		log.Println("Upload API Failed to upload file, failing build")
 		_ = p.WriteFileUploadResult("", "", err)
 		return fmt.Errorf("Failed to upload file %s ", p.Config.FilePath)
 	}
@@ -370,7 +393,7 @@ func (p Plugin) UploadFile() error {
 	err = p.WriteFileUploadResult(slackSummary.ID, slackSummary.Title, err)
 	if !p.Config.FailOnError {
 		if err != nil {
-			fmt.Println("Unable to Write output env var results for file upload " +
+			log.Println("Unable to Write output env var results for file upload " +
 				"but passing build PLUGIN_FAIL_ON_ERROR is false")
 		}
 		return nil
@@ -481,4 +504,189 @@ func prepend(prefix, s string) string {
 	}
 
 	return s
+}
+
+func GetSlackIdsOfCommitters(p *Plugin,
+	getAuthorsListFunc func(string) ([]string, error),
+	getSlackUserIDByEmailFunc func(string, string) ([]string, error)) ([]string, error) {
+
+	if p.Config.CommitterListGitPath == "" {
+		p.Config.CommitterListGitPath = os.Getenv("DRONE_WORKSPACE")
+	}
+
+	emails, err := getAuthorsListFunc(p.Config.CommitterListGitPath)
+	if err != nil {
+		log.Println("Failed to get git emails: ", err)
+		return []string{}, fmt.Errorf("failed to get git emails: %w", err)
+	}
+
+	slackUserIdList, err := getSlackUserIDByEmailFunc(p.Config.AccessToken, strings.Join(emails, ","))
+	if err != nil {
+		log.Println("Failed to get Slack ID by email: ", err)
+		return []string{}, fmt.Errorf("failed to get Slack ID by email: %w", err)
+	}
+
+	jsonStr := strings.Join(slackUserIdList, ",")
+	err = WriteEnvToOutputFile("COMMITTERS_SLACK_IDS", jsonStr)
+	if err != nil {
+		log.Println("Failed to write git emails to output file: ", err)
+		return []string{}, fmt.Errorf("failed to write git emails to output file: %w", err)
+	}
+
+	return slackUserIdList, nil
+}
+
+func GetSlackIdFromEmail(p *Plugin) error {
+	slackIdList, err := getSlackUserIDByEmail(p.Config.AccessToken, p.Config.SlackIdOf)
+	if err != nil {
+		log.Println("Failed to get Slack ID by email: ", err)
+		return fmt.Errorf("failed to get Slack ID by email: %w", err)
+	}
+
+	slackIdsCsvStr := strings.Join(slackIdList, ",")
+	err = WriteEnvToOutputFile("SLACK_ID_FROM_EMAIL", slackIdsCsvStr)
+	if err != nil {
+		return fmt.Errorf("failed to write Slack ID to output file: %w", err)
+	}
+	return nil
+}
+
+func getSlackUserIDByEmail(accessToken, emailListStr string) ([]string, error) {
+
+	emailArray := []string{}
+	for _, email := range strings.Split(emailListStr, ",") {
+		trimmedEmail := strings.TrimSpace(email)
+		if trimmedEmail != "" {
+			emailArray = append(emailArray, trimmedEmail)
+		}
+	}
+	slackIdsList := []string{}
+
+	var failedEmails []string
+	for _, email := range emailArray {
+		api := slack.New(accessToken)
+		if api == nil {
+			log.Println("Failed to create Slack client")
+			return emailArray, fmt.Errorf("failed to create Slack client")
+		}
+
+		user, err := api.GetUserByEmail(email)
+		if err != nil {
+			log.Printf("Failed to fetch Slack ID for email %s: %v", email, err)
+			failedEmails = append(failedEmails, email)
+			continue
+		}
+		slackIdsList = append(slackIdsList, user.ID)
+
+		// Add a short delay to avoid rate limits
+		time.Sleep(500 * time.Millisecond)
+	}
+	if len(failedEmails) > 0 {
+		log.Printf("Failed to fetch Slack IDs for the following emails: %v", failedEmails)
+	}
+
+	return slackIdsList, nil
+}
+
+func (p Plugin) sendDirectMessageToCommitters(options []slack.MsgOption) error {
+	slackUserIdList, err := GetSlackIdsOfCommitters(&p, GetChangesetAuthorsList, getSlackUserIDByEmail)
+	if err != nil {
+		log.Println("Failed to get Slack ID by email: ", err)
+		return fmt.Errorf("failed to get Slack ID by email: %w", err)
+	}
+	for _, slackUserId := range slackUserIdList {
+		err = sendDirectMessage(p.Config.AccessToken, slackUserId, options)
+		if err != nil {
+			log.Println("Failed to send direct message: ", err)
+			continue
+		}
+		log.Println("Message sent successfully for ", slackUserId)
+	}
+	return nil
+}
+
+func sendDirectMessage(botToken, userID string, options []slack.MsgOption) error {
+
+	client := slack.New(botToken)
+
+	channel, _, _, err := client.OpenConversation(&slack.OpenConversationParameters{
+		ReturnIM: true,
+		Users:    []string{userID},
+	})
+	if err != nil {
+		log.Println("Failed to open conversation: ", err)
+	}
+
+	_, _, err = client.PostMessage(channel.ID, options...)
+	if err != nil {
+		log.Printf("Failed to send direct slack message: %v", err)
+	}
+
+	return nil
+}
+
+func GetChangesetAuthorsList(gitDir string) ([]string, error) {
+	if gitDir == "" {
+		log.Println("gitDir is empty")
+		return nil, fmt.Errorf("gitDir cannot be empty")
+	}
+
+	absGitDir, err := filepath.Abs(gitDir)
+	if err != nil {
+		log.Println("Failed to get absolute path of gitDir: ", gitDir)
+		return nil, fmt.Errorf("failed to get absolute path of gitDir: %w", err)
+	}
+
+	repo, err := git.PlainOpen(absGitDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open git repository: %w", err)
+	}
+
+	headRef, err := repo.Head()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get HEAD reference: %w", err)
+	}
+
+	headCommit, err := repo.CommitObject(headRef.Hash())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get HEAD commit: %w", err)
+	}
+
+	parentCommitIter := headCommit.Parents()
+	oldCommit, err := parentCommitIter.Next()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get parent commit of HEAD: %w", err)
+	}
+
+	emailSet := make(map[string]struct{})
+
+	commitIter, err := repo.Log(&git.LogOptions{
+		From:  headCommit.Hash,
+		Order: git.LogOrderCommitterTime,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get commit log: %w", err)
+	}
+
+	err = commitIter.ForEach(func(commit *object.Commit) error {
+		// Stop if we reach the parent commit
+		if commit.Hash == oldCommit.Hash {
+			return nil
+		}
+
+		email := strings.TrimSpace(commit.Author.Email)
+		if email != "" {
+			emailSet[email] = struct{}{}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error during commit log iteration: %w", err)
+	}
+
+	var uniqueEmails []string
+	for email := range emailSet {
+		uniqueEmails = append(uniqueEmails, email)
+	}
+	return uniqueEmails, nil
 }

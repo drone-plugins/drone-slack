@@ -1,4 +1,4 @@
-FROM plugins/base:multiarch
+FROM alpine:3.20
 
 LABEL maintainer="Drone.IO Community <drone-dev@googlegroups.com>" \
   org.label-schema.name="Drone Slack" \

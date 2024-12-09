@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -216,4 +219,158 @@ func TestFileUpload(t *testing.T) {
 	plugin.Config.Webhook = server.URL
 
 	_ = plugin.Exec()
+}
+
+func TestGetSlackIdFromEmail(t *testing.T) {
+	config := Config{
+		AccessToken: "test-access-token",
+		SlackIdOf:   "octocat@github.com",
+	}
+
+	plugin := Plugin{
+		Config: config,
+	}
+
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := `{
+			"user": {
+				"id": "U12345",
+				"name": "octocat"
+			}
+		}`
+		_, _ = w.Write([]byte(response))
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	plugin.Config.AccessToken = server.URL
+
+	err := GetSlackIdFromEmail(&plugin)
+	assert.NilError(t, err, "should retrieve Slack ID without error")
+}
+
+func TestGetSlackIdsOfCommitters(t *testing.T) {
+	config := Config{
+		AccessToken:          "mock-access-token",
+		CommitterListGitPath: "/mock/repo/path",
+	}
+
+	plugin := Plugin{Config: config}
+
+	mockGetAuthorsList := func(gitDir string) ([]string, error) {
+		return []string{"user1@example.com", "user2@example.com"}, nil
+	}
+
+	mockGetSlackUserIDByEmail := func(accessToken string, emailList string) ([]string, error) {
+		emails := strings.Split(emailList, ",")
+		emailToID := map[string]string{
+			"user1@example.com": "U12345",
+			"user2@example.com": "U67890",
+		}
+
+		var ids []string
+		for _, email := range emails {
+			id, ok := emailToID[email]
+			if !ok {
+				return nil, fmt.Errorf("invalid_auth")
+			}
+			ids = append(ids, id)
+		}
+		return ids, nil
+	}
+
+	slackIDs, err := GetSlackIdsOfCommitters(&plugin, mockGetAuthorsList, mockGetSlackUserIDByEmail)
+	assert.NilError(t, err, "should retrieve Slack IDs without error")
+	assert.DeepEqual(t, slackIDs, []string{"U12345", "U67890"})
+}
+
+func TestGetSlackIdsOfCommitters_NoCommitters(t *testing.T) {
+	config := Config{
+		AccessToken:          "mock-access-token",
+		CommitterListGitPath: "/mock/repo/path",
+	}
+
+	plugin := Plugin{Config: config}
+
+	mockGetAuthorsList := func(gitDir string) ([]string, error) {
+		return []string{}, nil
+	}
+
+	mockGetSlackUserIDByEmail := func(accessToken string, emailList string) ([]string, error) {
+		if emailList == "" {
+			return []string{}, nil
+		}
+		return nil, fmt.Errorf("unexpected call to getSlackUserIDByEmail")
+	}
+
+	slackIDs, err := GetSlackIdsOfCommitters(&plugin, mockGetAuthorsList, mockGetSlackUserIDByEmail)
+
+	assert.NilError(t, err, "should handle a new repository without error")
+
+	expectedSlackIDs := []string{}
+	if diff := cmp.Diff(expectedSlackIDs, slackIDs); diff != "" {
+		t.Errorf("mismatch in Slack IDs (-want +got):\n%s", diff)
+	}
+}
+
+func TestGetSlackIdsOfCommitters_SlackUserLookupFailure(t *testing.T) {
+	config := Config{
+		AccessToken:          "mock-access-token",
+		CommitterListGitPath: "/mock/repo/path",
+	}
+
+	plugin := Plugin{Config: config}
+	mockGetAuthorsList := func(gitDir string) ([]string, error) {
+		return []string{"user1@example.com", "user2@example.com"}, nil
+	}
+
+	mockGetSlackUserIDByEmail := func(accessToken string, emailList string) ([]string, error) {
+		emails := strings.Split(emailList, ",")
+		emailToID := map[string]string{
+			"user1@example.com": "U12345",
+		}
+
+		var ids []string
+		for _, email := range emails {
+			id, ok := emailToID[email]
+			if !ok {
+				return nil, fmt.Errorf("user lookup failed for email: %s", email)
+			}
+			ids = append(ids, id)
+		}
+		return ids, nil
+	}
+
+	slackIDs, err := GetSlackIdsOfCommitters(&plugin, mockGetAuthorsList, mockGetSlackUserIDByEmail)
+	assert.ErrorContains(t, err, "user lookup failed for email: user2@example.com")
+	expectedSlackIDs := []string{}
+	if diff := cmp.Diff(expectedSlackIDs, slackIDs); diff != "" {
+		t.Errorf("mismatch in Slack IDs (-want +got):\n%s", diff)
+	}
+}
+
+func TestGetSlackIdsOfCommitters_SlackRateLimit(t *testing.T) {
+	config := Config{
+		AccessToken:          "mock-access-token",
+		CommitterListGitPath: "/mock/repo/path",
+	}
+
+	plugin := Plugin{Config: config}
+	mockGetAuthorsList := func(gitDir string) ([]string, error) {
+		return []string{"user1@example.com", "user2@example.com"}, nil
+	}
+
+	mockGetSlackUserIDByEmail := func(accessToken string, emailList string) ([]string, error) {
+		return nil, fmt.Errorf("rate_limit_exceeded: too many requests")
+	}
+
+	slackIDs, err := GetSlackIdsOfCommitters(&plugin, mockGetAuthorsList, mockGetSlackUserIDByEmail)
+
+	assert.ErrorContains(t, err, "rate_limit_exceeded")
+	expectedSlackIDs := []string{}
+	if diff := cmp.Diff(expectedSlackIDs, slackIDs); diff != "" {
+		t.Errorf("mismatch in Slack IDs (-want +got):\n%s", diff)
+	}
 }
