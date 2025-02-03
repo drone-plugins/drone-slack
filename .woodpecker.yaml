@@ -1,0 +1,54 @@
+when:
+  branch: master
+
+steps:
+  lint-and-build:
+    image: golang:1.22
+    pull: true
+    environment:
+      CGO_ENABLED: 0
+    commands:
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - golangci-lint version
+      - golangci-lint run
+      - go build -a -tags netgo -ldflags '-w' .
+
+  #test:
+  #  image: golang:1.21
+  #  commands:
+  #    - go test -cover ./...
+
+  publish-standalone-cleaner-image:
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      repo: gowerstreet/slack
+      tags:
+        - latest
+        - "1.0.${CI_PIPELINE_NUMBER}"
+      platforms:
+        - linux/amd64
+
+  
+  slack:
+    image: gowerstreet/slack:latest
+    settings:
+      status: failure
+      webhook:
+        from_secret: slack_webhook
+    when:
+      status: failure
+
+  slack:
+    image: gowerstreet/slack:latest
+    settings:
+      status: success
+      webhook:
+        from_secret: slack_webhook
+    when:
+      event: push
+      branch: master
+      status: success
