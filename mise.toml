@@ -1,0 +1,29 @@
+[tools]
+go = "1.23"
+
+[tasks.build]
+sources = ["*.go"]
+outputs = "drone-slack"
+env.CGO_ENABLED = 0
+run = "go build -a -tags netgo -ldflags '-w' ."
+
+[tasks."run:local"]
+env.PLUGIN_CHANNEL = "foo"
+env.PLUGIN_USERNAME = "drone"
+env.PLUGIN_STATUS = "failure"
+env.CI_REPO_OWNER = "octocat"
+env.CI_REPO_NAME = "hello-world"
+env.CI_COMMIT_SHA = "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d"
+env.CI_COMMIT_BRANCH = "master"
+env.CI_COMMIT_AUTHOR = "octocat"
+env.CI_COMMIT_AUTHOR_EMAIL = "octocat@github.com"
+env.CI_COMMIT_AUTHOR_AVATAR = "https://avatars0.githubusercontent.com/u/583231?s=460&v=4"
+env.CI_COMMIT_AUTHOR_NAME = "The Octocat"
+env.CI_COMMIT_TAG = "1.0.0"
+env.CI_PIPELINE_NUMBER = 1
+env.CI_PIPELINE_LINK = "http://github.com/octocat/hello-world"
+depends = ["build"]
+run = "./drone-slack"
+
+[env]
+SLACK_WEBHOOK = { value = "{{env._SLACK_ALERTS_WEBHOOK}}", redact = true }

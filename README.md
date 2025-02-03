@@ -1,20 +1,15 @@
-# drone-slack
+# Woodpecker CI Slack Plugin
 
-[![Build Status](http://harness.drone.io/api/badges/drone-plugins/drone-slack/status.svg)](http://harness.drone.io/drone-plugins/drone-slack)
-[![Slack](https://img.shields.io/badge/slack-drone-orange.svg?logo=slack)](https://join.slack.com/t/harnesscommunity/shared_invite/zt-y4hdqh7p-RVuEQyIl5Hcx4Ck8VCvzBw)
-[![Join the discussion at https://community.harness.io](https://img.shields.io/badge/discourse-forum-orange.svg)](https://community.harness.io)
-[![Drone questions at https://stackoverflow.com](https://img.shields.io/badge/drone-stackoverflow-orange.svg)](https://stackoverflow.com/questions/tagged/drone.io)
-[![Go Doc](https://godoc.org/github.com/drone-plugins/drone-slack?status.svg)](http://godoc.org/github.com/drone-plugins/drone-slack)
-[![Go Report](https://goreportcard.com/badge/github.com/drone-plugins/drone-slack)](https://goreportcard.com/report/github.com/drone-plugins/drone-slack)
+Woodpecker plugin for sending Slack notifications cloned from: https://github.com/drone-plugins/drone-slack
 
-Drone plugin for sending Slack notifications. For the usage information and a listing of the available options please take a look at [the docs](http://plugins.drone.io/drone-plugins/drone-slack/).
+For the usage information and a listing of the available options please take a look at [the docs](http://plugins.drone.io/drone-plugins/drone-slack/).
 
 ## Build
 
 Build the binary with the following commands:
 
 ```
-go build
+mise run build
 ```
 
 ## Docker
@@ -22,8 +17,7 @@ go build
 Build the Docker image with the following commands:
 
 ```
-GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -tags netgo -o release/linux/amd64/drone-slack
-docker build --rm -t plugins/slack .
+docker build --rm -t gowerstreet/slack -f docker/Dockerfile.linux.amd64 .
 ```
 
 ## Send Slack messages Usage
@@ -34,22 +28,22 @@ Execute from the working directory:
 
 ```
 docker run --rm \
-  -e SLACK_WEBHOOK=https://hooks.slack.com/services/... \
+  -e SLACK_WEBHOOK=$SLACK_WEBHOOK \
   -e PLUGIN_CHANNEL=foo \
   -e PLUGIN_USERNAME=drone \
-  -e DRONE_REPO_OWNER=octocat \
-  -e DRONE_REPO_NAME=hello-world \
-  -e DRONE_COMMIT_SHA=7fd1a60b01f91b314f59955a4e4d4e80d8edf11d \
-  -e DRONE_COMMIT_BRANCH=master \
-  -e DRONE_COMMIT_AUTHOR=octocat \
-  -e DRONE_COMMIT_AUTHOR_EMAIL=octocat@github.com \
-  -e DRONE_COMMIT_AUTHOR_AVATAR="https://avatars0.githubusercontent.com/u/583231?s=460&v=4" \
-  -e DRONE_COMMIT_AUTHOR_NAME="The Octocat" \
-  -e DRONE_BUILD_NUMBER=1 \
-  -e DRONE_BUILD_STATUS=success \
-  -e DRONE_BUILD_LINK=http://github.com/octocat/hello-world \
-  -e DRONE_TAG=1.0.0 \
-  plugins/slack
+  -e CI_REPO_OWNER=octocat \
+  -e CI_REPO_NAME=hello-world \
+  -e CI_COMMIT_SHA=7fd1a60b01f91b314f59955a4e4d4e80d8edf11d \
+  -e CI_COMMIT_BRANCH=master \
+  -e CI_COMMIT_AUTHOR=octocat \
+  -e CI_COMMIT_AUTHOR_EMAIL=octocat@github.com \
+  -e CI_COMMIT_AUTHOR_AVATAR="https://avatars0.githubusercontent.com/u/583231?s=460&v=4" \
+  -e CI_COMMIT_AUTHOR_NAME="The Octocat" \
+  -e CI_COMMIT_TAG=1.0.0 \
+  -e CI_PIPELINE_NUMBER=1 \
+  -e CI_PIPELINE_STATUS=success \
+  -e CI_PIPELINE_LINK=http://github.com/octocat/hello-world \
+  gowerstreet/slack:local
 ```
 
 Please note the following new environment variables:
@@ -60,7 +54,6 @@ Please note the following new environment variables:
 Make sure to replace `your_access_token` with your actual Slack access token and adjust
 
 If you provide an access token, it will use the Slack API to send the message. Otherwise, it will use the webhook.
-
 
 ## Upload files to Slack
 
