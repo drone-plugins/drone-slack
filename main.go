@@ -131,6 +131,11 @@ func main() {
 			EnvVar: "CI_COMMIT_PULL_REQUEST",
 		},
 		cli.StringFlag{
+			Name:   "commit.pull.branch",
+			Usage:  "git pull request branch",
+			EnvVar: "CI_COMMIT_SOURCE_BRANCH",
+		},
+		cli.StringFlag{
 			Name:   "commit.message",
 			Usage:  "commit message",
 			EnvVar: "CI_COMMIT_MESSAGE",
@@ -160,7 +165,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "build.link",
 			Usage:  "build link",
-			EnvVar: "CI_PIPELINE_LINK",
+			EnvVar: "CI_PIPELINE_URL",
 		},
 		cli.Int64Flag{
 			Name:   "build.started",
@@ -254,7 +259,12 @@ func main() {
 			Usage:  "flag to enable fetching slack IDs from the committers list",
 			EnvVar: "PLUGIN_COMMITTERS_SLACK_ID",
 		},
-	}
+		cli.StringFlag{
+			Name:   "description",
+			Usage:  "description of the build",
+			EnvVar: "PLUGIN_DESCRIPTION",
+		},
+    }
 
 	if _, err := os.Stat("/run/drone/env"); err == nil {
 		_ = godotenv.Overload("/run/drone/env")
@@ -287,6 +297,7 @@ func run(c *cli.Context) error {
 				Avatar:   c.String("commit.author.avatar"),
 			},
 			Pull:     c.String("commit.pull"),
+			PullBranch: c.String("commit.pull.branch"),
 			Message:  newCommitMessage(c.String("commit.message")),
 			DeployTo: c.String("build.deployTo"),
 			Link:     c.String("build.link"),
@@ -322,6 +333,7 @@ func run(c *cli.Context) error {
 			SlackIdOf:            c.String("slack_id_of"),
 			CommitterListGitPath: c.String("committer_list_git_path"),
 			CommitterSlackId:     c.Bool("plugin_committer_slack_id"),
+            Description:          c.String("description"),
 		},
 	}
 

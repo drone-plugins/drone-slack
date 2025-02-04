@@ -29,21 +29,22 @@ type (
 	}
 
 	Build struct {
-		Tag      string
-		Event    string
-		Number   int
-		Parent   int
-		Commit   string
-		Ref      string
-		Branch   string
-		Author   Author
-		Pull     string
-		Message  Message
-		DeployTo string
-		Status   string
-		Link     string
-		Started  int64
-		Created  int64
+		Tag         string
+		Event       string
+		Number      int
+		Parent      int
+		Commit      string
+		Ref         string
+		Branch      string
+		Author      Author
+		Pull        string
+		PullBranch  string
+		Message     Message
+		DeployTo    string
+		Status      string
+		Link        string
+		Started     int64
+		Created     int64
 	}
 
 	Author struct {
@@ -87,6 +88,7 @@ type (
 		// Git path to get list of committer emails
 		CommitterListGitPath string
 		CommitterSlackId     bool
+        Description     string
 	}
 
 	Job struct {
@@ -155,7 +157,7 @@ func (p Plugin) Exec() error {
 	} else if p.Config.Message != "" {
 		text = p.Config.Message
 	} else {
-		text = message(p.Repo, p.Build)
+		text = message(p.Repo, p.Build, p.Config)
 	}
 
 	// Add mentions to the message
@@ -256,7 +258,7 @@ func (p Plugin) Exec() error {
 			return err
 		}
 	} else {
-		fallbackText = fallback(p.Repo, p.Build)
+		fallbackText = message(p.Repo, p.Build, p.Config)
 	}
 
 	// Determine the color
@@ -464,26 +466,39 @@ func templateMessage(t string, plugin Plugin) (string, error) {
 	return template.RenderTrim(c, plugin)
 }
 
-func message(repo Repo, build Build) string {
-	return fmt.Sprintf("*%s* <%s|%s/%s#%s> (%s) by %s",
-		build.Status,
-		build.Link,
-		repo.Owner,
-		repo.Name,
-		build.Commit[:8],
-		build.Branch,
-		build.Author,
-	)
-}
+func message(repo Repo, build Build, config Config) string {
+	var repoLink string
+    var status string
+    var branch string
+    var repoName string
+	if build.Pull != "" {
+        branch = build.PullBranch
+        repoLink = fmt.Sprintf("<https://github.com/%s/%s/pull/%s|%s>", repo.Owner, repo.Name, build.Pull, branch)
+        status = strings.Title(build.Status)
+	} else {
+        branch = fmt.Sprintf("*%s*", build.Branch)
+        repoLink = fmt.Sprintf("<https://github.com/%s/%s/tree/%s|%s>", repo.Owner, repo.Name, build.Branch, branch)
+        if build.Status == "Success" {
+            status = "Releasing"
+        } else {
+            status = strings.Title(build.Status)
+        }
+	}
+    repoName = fmt.Sprintf("<https://github.com/%s/%s/|%s>", repo.Owner, repo.Name, repo.Name)
 
-func fallback(repo Repo, build Build) string {
-	return fmt.Sprintf("%s %s/%s#%s (%s) by %s",
-		build.Status,
-		repo.Owner,
-		repo.Name,
-		build.Commit[:8],
-		build.Branch,
-		build.Author,
+	description := ""
+	if config.Description != "" {
+		description = fmt.Sprintf("%s • ", config.Description)
+	}
+
+    return fmt.Sprintf("%s: %s/%s • %s<%s|CI Pipeline>\n`%s` by %s",
+        status,
+        repoName,
+        repoLink,
+        description,
+		build.Link,
+        build.Message.Title,
+		build.Author.Email,
 	)
 }
 

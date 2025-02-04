@@ -18,7 +18,7 @@ steps:
   #  commands:
   #    - go test -cover ./...
 
-  publish-standalone-cleaner-image:
+  publish:
     image: woodpeckerci/plugin-docker-buildx
     settings:
       username:

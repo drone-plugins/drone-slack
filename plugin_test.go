@@ -78,22 +78,14 @@ func TestNewCommitMessage(t *testing.T) {
 func TestDefaultMessage(t *testing.T) {
 	repo := getTestRepo()
 	build := getTestBuild()
+    config := getTestConfig()
 
-	msg := message(repo, build)
+	msg := message(repo, build, config)
 	expectedMessage := "*success* <http://github.com/octocat/hello-world|octocat/hello-world#7fd1a60b> (master) by octocat"
 
 	assert.Equal(t, expectedMessage, msg)
 }
 
-func TestDefaultFallbackMessage(t *testing.T) {
-	repo := getTestRepo()
-	build := getTestBuild()
-
-	msg := fallback(repo, build)
-	expectedMessage := "success octocat/hello-world#7fd1a60b (master) by octocat"
-
-	assert.Equal(t, expectedMessage, msg)
-}
 
 func TestTemplateMessage(t *testing.T) {
 	plugin := getTestPlugin()
