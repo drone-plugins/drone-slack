@@ -35,7 +35,7 @@ pipeline:
                   identifier: Lint
                   spec:
                     connectorRef: Plugins_Docker_Hub_Connector
-                    image: golang:1.22
+                    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
                     shell: Sh
                     command: |-
                       go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
@@ -47,7 +47,7 @@ pipeline:
                   identifier: Run_1
                   spec:
                     connectorRef: Plugins_Docker_Hub_Connector
-                    image: golang:1.21
+                    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
                     shell: Sh
                     command: go test -cover ./...
         description: ""
@@ -75,7 +75,7 @@ pipeline:
                       type: Run
                       spec:
                         connectorRef: Plugins_Docker_Hub_Connector
-                        image: golang:1.21
+                        image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
                         shell: Sh
                         command: |-
                           # force go modules
@@ -148,7 +148,7 @@ pipeline:
                       type: Run
                       spec:
                         connectorRef: Plugins_Docker_Hub_Connector
-                        image: golang:1.21
+                        image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
                         shell: Sh
                         command: |-
                           # force go modules
@@ -216,6 +216,8 @@ pipeline:
                       spec:
                         connectorRef: Plugins_Docker_Hub_Connector
                         image: golang:1.21
+                        envVariables:
+                          GOTOOLCHAIN: go1.26.10
                         shell: Sh
                         command: |-
                           # force go modules
@@ -298,6 +300,8 @@ pipeline:
                       spec:
                         connectorRef: Plugins_Docker_Hub_Connector
                         image: golang:1.21
+                        envVariables:
+                          GOTOOLCHAIN: go1.26.10
                         shell: Sh
                         command: |-
                           # force go modules

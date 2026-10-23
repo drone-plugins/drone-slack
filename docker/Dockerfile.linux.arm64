@@ -1,4 +1,4 @@
-FROM alpine:3.20
+FROM harness0.harness.io/oci/docker_artifacts/hhi/harnessos-alpine:1
 
 LABEL maintainer="Drone.IO Community <drone-dev@googlegroups.com>" \
   org.label-schema.name="Drone Slack" \
