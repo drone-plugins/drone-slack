@@ -9,7 +9,7 @@ pool:
 
 steps:
   - name: lint
-    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
+    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
     pull: always
     commands:
       - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
@@ -19,7 +19,7 @@ steps:
       - name: gopath
         path: "/go"
   - name: test
-    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
+    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
     commands:
       - go test -cover ./...
     volumes:
@@ -46,7 +46,7 @@ pool:
 
 steps:
   - name: environment
-    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
+    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
     pull: always
     environment:
       CGO_ENABLED: "0"
@@ -54,7 +54,7 @@ steps:
       - go version
       - go env
   - name: build
-    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
+    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
     environment:
       CGO_ENABLED: "0"
     commands:
@@ -62,6 +62,8 @@ steps:
   - name: docker
     image: plugins/docker
     settings:
+      pull_image: true
+      no_cache: true
       dockerfile: docker/Dockerfile.linux.amd64
       repo: plugins/slack
       username:
@@ -90,7 +92,7 @@ pool:
 
 steps:
   - name: environment
-    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
+    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
     pull: always
     environment:
       CGO_ENABLED: "0"
@@ -98,7 +100,7 @@ steps:
       - go version
       - go env
   - name: build
-    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
+    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
     environment:
       CGO_ENABLED: "0"
     commands:
@@ -106,6 +108,8 @@ steps:
   - name: docker
     image: plugins/docker
     settings:
+      pull_image: true
+      no_cache: true
       dockerfile: docker/Dockerfile.linux.arm64
       repo: plugins/slack
       username:
@@ -152,6 +156,8 @@ steps:
   - name: docker
     image: plugins/docker
     settings:
+      pull_image: true
+      no_cache: true
       dockerfile: docker/Dockerfile.windows.1809
       repo: plugins/slack
       username:
@@ -204,6 +210,8 @@ steps:
   - name: docker
     image: plugins/docker
     settings:
+      pull_image: true
+      no_cache: true
       dockerfile: docker/Dockerfile.windows.ltsc2022
       repo: plugins/slack
       username:

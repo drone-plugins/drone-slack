@@ -35,7 +35,7 @@ pipeline:
                   identifier: Lint
                   spec:
                     connectorRef: HHI_Public_Images
-                    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
+                    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
                     shell: Sh
                     command: |-
                       go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
@@ -47,7 +47,7 @@ pipeline:
                   identifier: Run_1
                   spec:
                     connectorRef: HHI_Public_Images
-                    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
+                    image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
                     shell: Sh
                     command: go test -cover ./...
         description: ""
@@ -75,7 +75,7 @@ pipeline:
                       type: Run
                       spec:
                         connectorRef: HHI_Public_Images
-                        image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
+                        image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
                         shell: Sh
                         command: |-
                           # force go modules
@@ -100,6 +100,8 @@ pipeline:
                         connectorRef: Plugins_Docker_Hub_Connector
                         image: plugins/docker
                         settings:
+                          pull_image: true
+                          no_cache: true
                           base_image_registry: harness0.harness.io
                           base_image_username: <+secrets.getValue("harness0HARUsername")>
                           base_image_password: <+secrets.getValue("harness0HARPAT")>
@@ -117,6 +119,10 @@ pipeline:
                       name: BuildAndPushDockerRegistry
                       identifier: BuildAndPushDockerRegistry
                       spec:
+                        envVariables:
+                          PLUGIN_NO_CACHE: "true"
+                          PLUGIN_PULL_IMAGE: "true"
+                          PLUGIN_ENABLE_CACHE: "false"
                         baseImageConnectorRefs:
                           - HHI_Public_Images
                         connectorRef: Plugins_Docker_Hub_Connector
@@ -153,7 +159,7 @@ pipeline:
                       type: Run
                       spec:
                         connectorRef: HHI_Public_Images
-                        image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10
+                        image: harness0.harness.io/oci/docker_artifacts/hhi/go:1.26.10@sha256:718fddf012b3a305e936ae9964e5a642036bcb7b4c6c0786e2f78f238d637db8
                         shell: Sh
                         command: |-
                           # force go modules
@@ -178,6 +184,8 @@ pipeline:
                         connectorRef: Plugins_Docker_Hub_Connector
                         image: plugins/docker
                         settings:
+                          pull_image: true
+                          no_cache: true
                           base_image_registry: harness0.harness.io
                           base_image_username: <+secrets.getValue("harness0HARUsername")>
                           base_image_password: <+secrets.getValue("harness0HARPAT")>
@@ -195,6 +203,10 @@ pipeline:
                       name: BuildAndPushDockerRegistry
                       identifier: BuildAndPushDockerRegistry
                       spec:
+                        envVariables:
+                          PLUGIN_NO_CACHE: "true"
+                          PLUGIN_PULL_IMAGE: "true"
+                          PLUGIN_ENABLE_CACHE: "false"
                         baseImageConnectorRefs:
                           - HHI_Public_Images
                         connectorRef: Plugins_Docker_Hub_Connector
@@ -252,6 +264,8 @@ pipeline:
                         connectorRef: Plugins_Docker_Hub_Connector
                         image: plugins/docker
                         settings:
+                          pull_image: true
+                          no_cache: true
                           username: drone
                           password: <+secrets.getValue("Plugins_Docker_Hub_Pat")>
                           repo: plugins/slack
@@ -266,6 +280,10 @@ pipeline:
                       name: BuildAndPushDockerRegistry
                       identifier: BuildAndPushDockerRegistry
                       spec:
+                        envVariables:
+                          PLUGIN_NO_CACHE: "true"
+                          PLUGIN_PULL_IMAGE: "true"
+                          PLUGIN_ENABLE_CACHE: "false"
                         connectorRef: Plugins_Docker_Hub_Connector
                         repo: plugins/slack
                         tags:
@@ -334,6 +352,8 @@ pipeline:
                         connectorRef: Plugins_Docker_Hub_Connector
                         image: plugins/docker
                         settings:
+                          pull_image: true
+                          no_cache: true
                           username: drone
                           password: <+secrets.getValue("Plugins_Docker_Hub_Pat")>
                           repo: plugins/slack
@@ -348,6 +368,10 @@ pipeline:
                       name: BuildAndPushDockerRegistry
                       identifier: BuildAndPushDockerRegistry
                       spec:
+                        envVariables:
+                          PLUGIN_NO_CACHE: "true"
+                          PLUGIN_PULL_IMAGE: "true"
+                          PLUGIN_ENABLE_CACHE: "false"
                         connectorRef: Plugins_Docker_Hub_Connector
                         repo: plugins/slack
                         tags:
