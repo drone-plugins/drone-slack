@@ -2,6 +2,8 @@ module github.com/drone-plugins/drone-slack
 
 go 1.20
 
+toolchain go1.26.10
+
 require (
 	github.com/drone/drone-template-lib v1.0.0
 	github.com/go-git/go-git/v5 v5.12.0
